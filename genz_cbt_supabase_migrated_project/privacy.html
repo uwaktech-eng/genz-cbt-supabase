@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Privacy Policy</title>
+  <link id="siteFavicon" rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%23081224%22/%3E%3Ctext x=%2250%25%22 y=%2254%25%22 font-size=%2232%22 text-anchor=%22middle%22 fill=%22%23facc15%22 font-family=%22Arial%22 dy=%22.1em%22%3EG%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="site-common.css">
+</head>
+<body>
+  <div class="site-shell">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <a class="brand" href="index.html"><span id="brandMark" class="mark">G</span><span id="brandName">Genz CBT Pro</span></a>
+        <nav class="nav">
+          <a href="index.html">Home</a>
+          <a href="about.html">About</a>
+          <a href="terms.html">Terms</a>
+          <a href="privacy.html">Privacy</a>
+          <a href="cookies.html">Cookies</a>
+          <a href="contact.html" class="active">Contact</a>
+        </nav>
+      </div>
+    </header>
+    <main class="wrap">
+      <div class="page-panel">
+        <div class="kicker">Privacy Policy</div>
+        <h1 id="pageTitle">Privacy Policy</h1>
+        <div class="longtext" id="pageIntro">Loading content...</div>
+      </div>
+      <div class="page-panel"><div class="longtext" id="pageBody">Loading content...</div></div>
+    </main>
+    <footer class="wrap footer"><div id="siteFooter"></div></footer>
+  </div>
+  <script src="site-common.js"></script>
+  <script>
+  
+      (async function(){
+        const data = await getPublicSiteContent();
+        setSiteFavicon(data.siteFaviconUrl || data.resultBrandLogoUrl);
+        renderBrand(document.getElementById('brandMark'), data);
+        document.getElementById('brandName').textContent = data.resultBrandName || 'Genz CBT Pro';
+        document.getElementById('pageTitle').textContent = 'Privacy Policy';
+        document.getElementById('pageIntro').innerHTML = nl2br(data.privacyContent || 'Add this content in admin settings.');
+        renderFooter(data);
+      })();
+    
+  </script>
+</body>
+</html>

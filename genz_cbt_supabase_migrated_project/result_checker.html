@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>CBT Result Checker</title>
+<link id="siteFavicon" rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%23081224%22/%3E%3Ctext x=%2250%25%22 y=%2254%25%22 font-size=%2232%22 text-anchor=%22middle%22 fill=%22%23facc15%22 font-family=%22Arial%22 dy=%22.1em%22%3EG%3C/text%3E%3C/svg%3E">
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+<style>
+:root{
+  --bg:#eef4ff;--bg2:#fbfdff;--panel:#ffffff;--line:#d7e2f1;--line-strong:#94a3b8;--text:#0f172a;--muted:#64748b;
+  --primary:#1d4ed8;--primary2:#4338ca;--accent:#0ea5e9;--ok:#166534;--bad:#b91c1c;
+  --shadow:0 28px 60px rgba(15,23,42,.12);--soft:0 12px 28px rgba(59,130,246,.10);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:Inter,Arial,sans-serif;background:
+  radial-gradient(circle at top left, rgba(59,130,246,.18), transparent 28%),
+  radial-gradient(circle at top right, rgba(147,51,234,.14), transparent 26%),
+  linear-gradient(180deg,var(--bg),var(--bg2));color:var(--text)}
+header{position:sticky;top:0;z-index:20;background:rgba(9,19,44,.88);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.08);color:#fff}
+.head{max-width:1240px;margin:auto;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.head h1{margin:0;font-size:1.18rem}
+.head a{color:#facc15;text-decoration:none;font-weight:800}
+.container{max-width:1240px;margin:28px auto;padding:0 18px 40px}
+.hero{display:grid;grid-template-columns:1.2fr .8fr;gap:20px;align-items:stretch;margin-bottom:20px}
+.glass,.card{background:rgba(255,255,255,.88);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.72);box-shadow:var(--shadow);border-radius:24px}
+.hero-panel{padding:24px;position:relative;overflow:hidden}
+.hero-panel:before{content:"";position:absolute;inset:-30% auto auto -8%;width:220px;height:220px;background:radial-gradient(circle, rgba(59,130,246,.25), transparent 70%)}
+.hero-title{font-size:2rem;line-height:1.1;font-weight:900;margin:0 0 12px}
+.hero-sub{color:#334155;line-height:1.7;max-width:58ch}
+.hero-badges{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.badge{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;font-weight:800;font-size:12px;background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8}
+.badge .dot{width:8px;height:8px;border-radius:999px;background:currentColor}
+.hero-side{padding:22px;background:linear-gradient(135deg,#1d4ed8,#4338ca 60%, #0ea5e9);color:#fff}
+.hero-side h3{margin:0 0 12px;font-size:1.05rem}
+.hero-side p{margin:0;line-height:1.7;color:rgba(255,255,255,.92)}
+.hero-side ul{padding-left:18px;line-height:1.8;margin:12px 0 0}
+.layout{display:grid;grid-template-columns:400px minmax(0,1fr);gap:20px;align-items:start}
+.card{padding:20px}
+.section-title{margin:0 0 14px;font-size:1.08rem}
+.muted{color:var(--muted)}
+label{display:block;font-weight:800;margin-bottom:6px;font-size:14px;color:#1e293b}
+input,select{width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:14px;margin-bottom:14px;font-size:15px;background:#fff;outline:none;transition:.18s ease}
+input:focus,select:focus{border-color:#60a5fa;box-shadow:0 0 0 4px rgba(96,165,250,.16)}
+button{border:none;border-radius:14px;min-height:46px;padding:0 16px;font-weight:800;cursor:pointer;background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;box-shadow:var(--soft);transition:transform .12s ease, opacity .12s ease}
+button:hover{transform:translateY(-1px)}
+button.ghost{background:#edf4ff;color:#1e3a8a;box-shadow:none;border:1px solid #c6d7f2}
+button.secondary{background:linear-gradient(135deg,#0f766e,#10b981)}
+button.light{background:#fff;color:#0f172a;border:1px solid #cbd5e1;box-shadow:none}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.actions>*{flex:1 1 160px}
+.status{font-size:14px;min-height:18px;margin-top:8px}.error{color:#b91c1c}.ok{color:#166534}
+.info{background:linear-gradient(180deg,#eff6ff,#f8fbff);border:1px solid #cfe0fb;color:#1d4ed8;padding:13px 14px;border-radius:14px;margin-bottom:14px;line-height:1.6}
+.quick-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+.quick-item{border:1px solid #d7e2f1;background:#fff;border-radius:16px;padding:14px}
+.quick-item b{display:block;font-size:1.15rem;margin-top:4px}
+.results-card{padding:0;overflow:hidden}
+.results-head{padding:18px 20px;border-bottom:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;background:linear-gradient(180deg,#ffffff,#f8fbff)}
+.results-body{padding:18px 20px}
+.results-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.table-wrap{overflow:auto;border:1.5px solid #cbd5e1;border-radius:18px;background:#fff}
+.table-wrap table{width:100%;border-collapse:collapse;min-width:760px;background:#fff;border:1.5px solid #cbd5e1;box-shadow:0 10px 30px rgba(15,23,42,.06);border-radius:18px;overflow:hidden}
+.table-wrap th,.table-wrap td{padding:13px 12px;border-bottom:1px solid #dbe4f3;text-align:left;font-size:14px;vertical-align:top}
+.table-wrap th{background:#eaf2ff;color:#1e3a8a;font-size:12px;text-transform:uppercase;letter-spacing:.35px;border-bottom:1.5px solid #bfd3f7}
+.table-wrap tr:hover td{background:#f8fbff}
+.state-chip{display:inline-flex;align-items:center;gap:8px;padding:8px 11px;border-radius:999px;font-weight:800;font-size:12px}
+.state-chip.pass{background:#dcfce7;color:#166534}
+.state-chip.fail{background:#fee2e2;color:#b91c1c}
+.state-chip.neutral{background:#eff6ff;color:#1d4ed8}
+.template-shell{position:relative;border-radius:28px;overflow:hidden;border:1.5px solid var(--theme-border,#cbd5e1);background:var(--theme-paper,#fff);box-shadow:0 22px 56px rgba(15,23,42,.14)}
+.template-watermark{position:absolute;right:-10px;top:95px;opacity:.06;pointer-events:none;max-width:220px;filter:grayscale(.1)}
+.result-header{position:relative;padding:28px 26px;color:#fff;background:var(--theme-header,linear-gradient(135deg,#1d4ed8,#4338ca 60%, #0ea5e9));}
+.result-header:after{content:"";position:absolute;inset:auto -8% -48px auto;width:240px;height:120px;background:radial-gradient(circle, rgba(255,255,255,.24), transparent 70%)}
+.result-header-row{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;flex-wrap:wrap}
+.brand-stack{display:flex;gap:16px;align-items:flex-start}
+.brand-logo{width:84px;height:84px;border-radius:22px;object-fit:cover;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.22)}
+.result-header h2{margin:0;font-size:1.55rem;line-height:1.08}
+.result-sub{margin-top:6px;opacity:.95;line-height:1.6}
+.result-meta-badges{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.result-meta-badges .pill{padding:9px 12px;border-radius:999px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.22);font-size:12px;font-weight:800}
+.result-body{padding:24px 24px 26px;background:linear-gradient(180deg,var(--theme-body,#fff), #ffffff)}
+.summary-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:-38px 0 18px;position:relative;z-index:2}
+.summary-card{background:#fff;border:1.5px solid var(--theme-card-border,#dbe4f3);box-shadow:0 14px 26px rgba(15,23,42,.08);border-radius:18px;padding:15px}
+.summary-card .k{font-size:12px;text-transform:uppercase;letter-spacing:.35px;color:#64748b;font-weight:800}
+.summary-card .v{font-weight:900;font-size:1.2rem;margin-top:6px;color:#0f172a}
+.identity-band{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:18px;align-items:start;margin-bottom:18px}
+.passport-card{background:#fff;border:1.5px solid #cbd5e1;border-radius:18px;padding:10px;box-shadow:0 8px 18px rgba(15,23,42,.06)}
+.passport-card img{width:100%;height:128px;object-fit:cover;border-radius:12px;background:#f8fafc;border:1px solid #e2e8f0}
+.passport-card .cap{text-align:center;font-size:12px;font-weight:800;color:#475569;margin-top:8px}
+.sheet-grid{display:grid;grid-template-columns:1.08fr .92fr;gap:18px}
+.panel{background:var(--theme-panel,#fff);border:1.5px solid var(--theme-panel-border,#cbd5e1);border-radius:20px;padding:18px;box-shadow:0 10px 22px rgba(15,23,42,.05)}
+.panel h3{margin:0 0 12px;font-size:1rem}
+.result-table{width:100%;border-collapse:collapse;table-layout:fixed}
+.result-table th,.result-table td{border:2px solid var(--theme-table-line,#64748b);padding:12px 11px;font-size:14px}
+.result-table th{width:34%;background:var(--theme-table-head,#e2e8f0);color:var(--theme-table-head-text,#0f172a);font-weight:800;text-transform:uppercase;font-size:12px;letter-spacing:.32px}
+.result-table td{background:var(--theme-table-body,#fff);font-weight:700;color:#0f172a} .selected-row{background:rgba(59,130,246,.06)} .selection-chip{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;background:#eef4ff;border:1px solid #bfdbfe;color:#1d4ed8;font-weight:800;font-size:12px}
+.performance-table th:nth-child(1){width:34%}
+.performance-table th:nth-child(3){width:22%}
+.remark-box{margin-top:18px;padding:18px;border-radius:18px;background:var(--theme-remark,#eff6ff);border:1.5px solid var(--theme-card-border,#cbd5e1);color:#0f172a;line-height:1.75}
+.sign-row{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-end;margin-top:18px;padding-top:16px;border-top:1px dashed #cbd5e1}
+.signature-box{display:flex;flex-direction:column;align-items:flex-end;min-width:220px}
+.signature-box img{max-width:220px;max-height:82px;object-fit:contain;display:block}
+.signature-line{width:220px;border-top:1.5px solid #334155;margin-top:8px;padding-top:6px;text-align:center;font-size:12px;font-weight:800;color:#334155}
+.review-title{margin:18px 0 12px}
+.review-item{border:1.5px solid #cbd5e1;border-radius:16px;padding:14px;background:#fff;margin-bottom:12px;box-shadow:0 8px 14px rgba(15,23,42,.04)}
+.pass{color:#166534;font-weight:800}.fail{color:#b91c1c;font-weight:800}
+.question-image{max-width:100%;width:auto;max-height:280px;border:1px solid #dbe4f3;border-radius:12px;display:block;margin:12px auto;background:#fff}
+.empty{padding:20px;text-align:center;color:#64748b;border:1px dashed #cbd5e1;border-radius:16px;background:#f8fbff}
+@media (max-width:1080px){.layout{grid-template-columns:1fr}.hero{grid-template-columns:1fr}.summary-strip{grid-template-columns:repeat(2,minmax(0,1fr))}.sheet-grid{grid-template-columns:1fr}.identity-band{grid-template-columns:1fr}.passport-card{max-width:160px}}
+@media (max-width:720px){.container{padding:0 12px 28px}.hero-title{font-size:1.55rem}.hero-panel,.hero-side,.card{padding:16px}.summary-strip{grid-template-columns:1fr}.result-header{padding:22px 18px}.result-body{padding:16px}.brand-logo{width:68px;height:68px}.result-header h2{font-size:1.18rem}.table-wrap table{min-width:620px}.actions{flex-direction:column}.actions>*{width:100%}.sheet-grid{gap:12px}.result-table th,.result-table td{padding:10px 8px;font-size:13px}}
+@page{size:A4;margin:12mm;} @media print{html,body,#resultBox,#resultBox *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;forced-color-adjust:none !important}body{background:#fff}header,.hero,aside.card,.results-head,.results-toolbar,.table-wrap,#reviewWrap{display:none !important}.container{max-width:none;margin:0;padding:0}.layout{display:block}.results-card{box-shadow:none;border:none;background:#fff}.results-body{padding:0}#resultCard{display:block !important}#resultBox .template-shell{box-shadow:none;border:1.5px solid var(--theme-border,#cbd5e1) !important;border-radius:0;background:var(--theme-paper,#fff) !important}#resultBox .result-header{background:var(--theme-header,linear-gradient(135deg,#1d4ed8,#4338ca 60%, #0ea5e9)) !important;color:#fff !important}#resultBox .result-body{background:linear-gradient(180deg,var(--theme-body,#fff),#ffffff) !important}#resultBox .summary-card{background:#fff !important;border-color:var(--theme-card-border,#dbe4f3) !important}#resultBox .panel{background:var(--theme-panel,#fff) !important;border-color:var(--theme-panel-border,#cbd5e1) !important}#resultBox .remark-box{background:var(--theme-remark,#eff6ff) !important;border-color:var(--theme-card-border,#cbd5e1) !important}#resultBox .result-table th{background:var(--theme-table-head,#e2e8f0) !important;color:var(--theme-table-head-text,#0f172a) !important;border-color:var(--theme-table-line,#64748b) !important}#resultBox .result-table td{background:var(--theme-table-body,#fff) !important;border-color:var(--theme-table-line,#64748b) !important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="head">
+    <h1>Student Result Checker</h1>
+    <a href="index.html">← Back Home</a>
+  </div>
+</header>
+
+<div class="container">
+  <section class="hero">
+    <div class="glass hero-panel">
+      <div class="badge"><span class="dot"></span> Published results only</div>
+      <h2 class="hero-title">View, combine, and download your results in cleaner, stronger, more modern report-card designs.</h2>
+      <div class="hero-sub">This portal is now focused only on result access. It does not depend on exam proctoring media, so result viewing stays simple and stable. Load your published results, choose any available exam, switch between richer design layouts, and download either one selected result or a combined report card with several results.</div>
+      <div class="hero-badges">
+        <div class="badge"><span class="dot"></span> 15 result designs</div>
+        <div class="badge"><span class="dot"></span> Published-result selector</div>
+        <div class="badge"><span class="dot"></span> Clearer tables</div>
+      </div>
+    </div>
+    <div class="glass hero-side">
+      <h3>How it works</h3>
+      <p>Enter your Registration ID and student password. You can either load all your published results first or type an exam code and open one result directly.</p>
+      <ul>
+        <li>Load all published results for your account</li>
+        <li>Choose any result you want to view</li>
+        <li>Switch between 15 result designs instantly</li>
+        <li>Download one result slip or a combined report card</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="layout">
+    <aside class="card">
+      <h2 class="section-title">Check Your Result</h2>
+      <div id="portalInfo" class="info">Use your Registration ID and student password. Exam code is optional. You can also load all published results linked to your account and choose from them.</div>
+      <label>Registration ID</label>
+      <input id="regId" type="text" placeholder="Registration ID">
+      <label>Student Password</label>
+      <input id="password" type="password" placeholder="Student password">
+      <label>Exam Code <span class="muted" style="font-weight:700">(optional for direct opening)</span></label>
+      <input id="examCode" type="text" placeholder="Example: MIDTERM2026">
+      <input id="selectedResultId" type="hidden">
+      <label>Result Design</label>
+      <select id="resultTemplate">
+        <option value="classic">Classic Blue</option>
+        <option value="royal">Royal Purple</option>
+        <option value="emerald">Emerald Green</option>
+        <option value="sunrise">Sunrise Gold</option>
+        <option value="midnight">Midnight Slate</option>
+        <option value="crimson">Crimson Red</option>
+        <option value="aqua">Aqua Teal</option>
+        <option value="graphite">Graphite Gray</option>
+        <option value="violet">Violet Glow</option>
+        <option value="rose">Rose Blush</option>
+        <option value="horizon">Horizon Cyan</option>
+        <option value="platinum">Platinum White</option>
+        <option value="copper">Copper Luxe</option>
+        <option value="indigo">Indigo Edge</option>
+        <option value="neon">Neon Pop</option>
+      </select>
+      <div class="actions">
+        <button id="loadMineBtn" type="button" class="secondary">Load My Published Results</button>
+        <button id="checkBtn" type="button">Open Selected Result</button>
+        <button id="downloadPdfBtn" type="button" class="ghost">Download PDF</button>
+        <button id="downloadReportCardBtn" type="button" class="ghost">Download Selected Report Card</button>
+        <button id="printBtn" type="button" class="light">Print Result</button>
+      </div>
+      <div id="checkStatus" class="status"></div>
+      <div class="quick-grid">
+        <div class="quick-item"><span class="muted">Published Results</span><b id="metricResults">0</b></div>
+        <div class="quick-item"><span class="muted">Selected Design</span><b id="metricTemplate">Classic</b></div>
+        <div class="quick-item"><span class="muted">Selected For Report Card</span><b id="metricSelected">0</b></div>
+        <div class="quick-item"><span class="muted">View Mode</span><b id="metricMode">Single</b></div>
+      </div>
+    </aside>
+
+    <section class="results-card glass">
+      <div class="results-head">
+        <div>
+          <h2 class="section-title" style="margin:0">Published Results</h2>
+          <div class="muted">Choose a published result to view it below.</div>
+        </div>
+        <div class="muted" id="studentWelcome">No student loaded yet.</div>
+      </div>
+      <div class="results-body">
+        <div class="results-toolbar">
+          <button id="refreshMineBtn" type="button" class="ghost">Refresh My Published Results</button>
+          <button id="selectAllPublishedBtn" type="button" class="ghost">Select All Loaded</button>
+          <button id="clearPublishedBtn" type="button" class="light">Clear Checked Results</button>
+          <button id="clearSelectionBtn" type="button" class="light">Clear Open Result</button>
+          <span class="selection-chip" id="selectedPublishedInfo">0 selected for combined report card</span>
+        </div>
+        <div class="table-wrap" id="publishedWrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Select</th>
+                <th>Exam Title</th>
+                <th>Exam Code</th>
+                <th>Attempt</th>
+                <th>Percentage</th>
+                <th>Status</th>
+                <th>Published On</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="publishedResultsBody">
+              <tr><td colspan="8"><div class="empty">Load your published results to see available result slips here.</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div id="resultCard" style="display:none;margin-top:18px">
+          <div id="resultBox"></div>
+          <div id="reviewWrap" style="display:none;margin-top:18px">
+            <h3 class="review-title">Answer Review</h3>
+            <div id="reviewList"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="api-client.js"></script>
+<script>
+const APPS_SCRIPT_URL = "/api/router";
+async function loadSiteFavicon(){ try{ const u=new URL(APPS_SCRIPT_URL); u.searchParams.set('action','getPublicSiteContent'); u.searchParams.set('_ts',Date.now()); const res=await fetch(u.toString()); const json=await res.json(); const url=json && json.data && (json.data.siteFaviconUrl || json.data.resultBrandLogoUrl); if(url && document.getElementById('siteFavicon')) document.getElementById('siteFavicon').href=url; }catch(err){} }
+const $ = id => document.getElementById(id);
+const state = { publishedResults: [], currentResult: null, selectedPublishedIds: new Set(), currentResultId: '' };
+const TEMPLATE_THEMES = {
+  classic:  { name:'Classic Blue', layout:'hero', header:'linear-gradient(135deg,#1d4ed8,#4338ca 58%, #0ea5e9)', border:'#bfd3f7', paper:'#ffffff', body:'#f8fbff', panel:'#ffffff', panelBorder:'#bfd3f7', cardBorder:'#cfe0fb', tableLine:'#8aa8df', tableHead:'#dbeafe', tableHeadText:'#1e3a8a', tableBody:'#ffffff', remark:'#eff6ff' },
+  royal:    { name:'Royal Purple', layout:'executive', header:'linear-gradient(135deg,#5b21b6,#7c3aed 55%, #ec4899)', border:'#dcc7ff', paper:'#fff', body:'#fbf7ff', panel:'#ffffff', panelBorder:'#d8b4fe', cardBorder:'#e9d5ff', tableLine:'#b794f4', tableHead:'#ede9fe', tableHeadText:'#5b21b6', tableBody:'#ffffff', remark:'#f5f3ff' },
+  emerald:  { name:'Emerald Green', layout:'split', header:'linear-gradient(135deg,#065f46,#0f766e 55%, #10b981)', border:'#b8ebd6', paper:'#fff', body:'#f3fffa', panel:'#ffffff', panelBorder:'#b7e4d3', cardBorder:'#c7f9df', tableLine:'#7fc9ae', tableHead:'#d1fae5', tableHeadText:'#065f46', tableBody:'#ffffff', remark:'#ecfdf5' },
+  sunrise:  { name:'Sunrise Gold', layout:'stacked', header:'linear-gradient(135deg,#92400e,#f59e0b 56%, #f97316)', border:'#f8d9a7', paper:'#fffdf8', body:'#fffaf0', panel:'#ffffff', panelBorder:'#f7d8ad', cardBorder:'#fde68a', tableLine:'#e9b96e', tableHead:'#fef3c7', tableHeadText:'#92400e', tableBody:'#fffdf8', remark:'#fffbeb' },
+  midnight: { name:'Midnight Slate', layout:'minimal', header:'linear-gradient(135deg,#0f172a,#1e293b 58%, #38bdf8)', border:'#b8c8da', paper:'#ffffff', body:'#f8fafc', panel:'#ffffff', panelBorder:'#c8d3df', cardBorder:'#d9e2ec', tableLine:'#94a3b8', tableHead:'#e2e8f0', tableHeadText:'#0f172a', tableBody:'#ffffff', remark:'#f1f5f9' },
+  crimson:  { name:'Crimson Red', layout:'ribbon', header:'linear-gradient(135deg,#991b1b,#dc2626 58%, #f97316)', border:'#f5b6b6', paper:'#fff', body:'#fff8f8', panel:'#ffffff', panelBorder:'#f4c7c7', cardBorder:'#fecaca', tableLine:'#e59aa3', tableHead:'#fee2e2', tableHeadText:'#991b1b', tableBody:'#ffffff', remark:'#fef2f2' },
+  aqua:     { name:'Aqua Teal', layout:'split', header:'linear-gradient(135deg,#155e75,#0f766e 56%, #06b6d4)', border:'#b4e4ec', paper:'#fbffff', body:'#f3fcfd', panel:'#ffffff', panelBorder:'#bde5eb', cardBorder:'#cceff2', tableLine:'#81cbd7', tableHead:'#cffafe', tableHeadText:'#155e75', tableBody:'#ffffff', remark:'#ecfeff' },
+  graphite: { name:'Graphite Gray', layout:'minimal', header:'linear-gradient(135deg,#111827,#374151 56%, #6b7280)', border:'#d1d5db', paper:'#ffffff', body:'#fcfcfd', panel:'#ffffff', panelBorder:'#d5d9df', cardBorder:'#e5e7eb', tableLine:'#9ca3af', tableHead:'#f3f4f6', tableHeadText:'#111827', tableBody:'#ffffff', remark:'#f9fafb' },
+  violet:   { name:'Violet Glow', layout:'executive', header:'linear-gradient(135deg,#6d28d9,#8b5cf6 56%, #22d3ee)', border:'#d5c2ff', paper:'#fff', body:'#fbfaff', panel:'#ffffff', panelBorder:'#d6ccff', cardBorder:'#ddd6fe', tableLine:'#a78bfa', tableHead:'#ede9fe', tableHeadText:'#6d28d9', tableBody:'#ffffff', remark:'#f5f3ff' },
+  rose:     { name:'Rose Blush', layout:'hero', header:'linear-gradient(135deg,#be185d,#ec4899 56%, #fb7185)', border:'#f5c2d4', paper:'#fff', body:'#fff8fb', panel:'#ffffff', panelBorder:'#f7cfde', cardBorder:'#fbcfe8', tableLine:'#f08fb6', tableHead:'#fce7f3', tableHeadText:'#9d174d', tableBody:'#ffffff', remark:'#fff1f7' },
+  horizon:  { name:'Horizon Cyan', layout:'split', header:'linear-gradient(135deg,#0f172a,#0369a1 55%, #22d3ee)', border:'#b8dced', paper:'#f8feff', body:'#f2fbfd', panel:'#ffffff', panelBorder:'#bae6fd', cardBorder:'#cce7f0', tableLine:'#67b7d1', tableHead:'#e0f2fe', tableHeadText:'#0c4a6e', tableBody:'#ffffff', remark:'#ecfeff' },
+  platinum: { name:'Platinum White', layout:'minimal', header:'linear-gradient(135deg,#334155,#64748b 55%, #cbd5e1)', border:'#d5dee8', paper:'#ffffff', body:'#fbfcfe', panel:'#ffffff', panelBorder:'#dde7f0', cardBorder:'#e2e8f0', tableLine:'#94a3b8', tableHead:'#f1f5f9', tableHeadText:'#0f172a', tableBody:'#ffffff', remark:'#f8fafc' },
+  copper:   { name:'Copper Luxe', layout:'stacked', header:'linear-gradient(135deg,#7c2d12,#b45309 55%, #fb923c)', border:'#f1c79d', paper:'#fffaf5', body:'#fff7ed', panel:'#ffffff', panelBorder:'#fed7aa', cardBorder:'#fdba74', tableLine:'#d59c6c', tableHead:'#ffedd5', tableHeadText:'#7c2d12', tableBody:'#fffaf5', remark:'#fff7ed' },
+  indigo:   { name:'Indigo Edge', layout:'executive', header:'linear-gradient(135deg,#312e81,#4338ca 55%, #818cf8)', border:'#c7ccff', paper:'#fbfbff', body:'#f6f7ff', panel:'#ffffff', panelBorder:'#c7d2fe', cardBorder:'#dbeafe', tableLine:'#9aa9ff', tableHead:'#e0e7ff', tableHeadText:'#312e81', tableBody:'#ffffff', remark:'#eef2ff' },
+  neon:     { name:'Neon Pop', layout:'ribbon', header:'linear-gradient(135deg,#111827,#7c3aed 52%, #06b6d4)', border:'#d3c3ff', paper:'#ffffff', body:'#f9fbff', panel:'#ffffff', panelBorder:'#c4b5fd', cardBorder:'#dbeafe', tableLine:'#8b5cf6', tableHead:'#ede9fe', tableHeadText:'#4c1d95', tableBody:'#ffffff', remark:'#f5f3ff' }
+};
+
+function esc(v){ return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function setStatus(id, message, ok=false){ const el=$(id); if(!el) return; el.className='status ' + (ok ? 'ok' : 'error'); el.textContent=message || ''; }
+function titleCase(s){ return String(s || '').replace(/[_-]+/g,' ').replace(/\b\w/g, m => m.toUpperCase()); }
+function normalizeImageUrl(url){
+  url = String(url || '').trim();
+  if(!url) return '';
+  const idPatterns = [
+    /[?&]id=([a-zA-Z0-9_-]+)/,
+    /\/file\/d\/([a-zA-Z0-9_-]+)/,
+    /\/open\?id=([a-zA-Z0-9_-]+)/,
+    /\/uc\?(?:export=(?:view|download)&)?id=([a-zA-Z0-9_-]+)/,
+    /\/thumbnail\?[^#]*id=([a-zA-Z0-9_-]+)/
+  ];
+  if(/drive\.google\.com/.test(url)){
+    for(const re of idPatterns){ const m = url.match(re); if(m && m[1]) return `https://drive.google.com/uc?export=view&id=${m[1]}`; }
+  }
+  return url;
+}
+function formatDate(value){
+  if(!value) return '—';
+  const d = new Date(value);
+  return isNaN(d.getTime()) ? String(value) : d.toLocaleString();
+}
+function pdfReady(){ return window.jspdf && window.jspdf.jsPDF; }
+function getSelectedTemplate(){ return $('resultTemplate') ? $('resultTemplate').value : 'classic'; }
+function getTemplateTheme(){ return TEMPLATE_THEMES[getSelectedTemplate()] || TEMPLATE_THEMES.classic; }
+function updateMetrics(){
+  $('metricResults').textContent = String(state.publishedResults.length || 0);
+  $('metricTemplate').textContent = (getTemplateTheme().name || 'Classic').split(' ').slice(0,2).join(' ');
+  $('metricSelected').textContent = String(state.selectedPublishedIds.size || 0);
+  $('metricMode').textContent = state.currentResult ? 'Single' : (state.selectedPublishedIds.size ? 'Report Card' : 'Idle');
+  if($('selectedPublishedInfo')) $('selectedPublishedInfo').textContent = `${state.selectedPublishedIds.size} selected for combined report card`;
+}
+async function apiRequest(action, payload={}, method='POST'){
+  return window.AppApi.request(action, payload, method);
+}
+function clearPublishedSelections(silent=false){
+  state.selectedPublishedIds = new Set();
+  updateMetrics();
+  if(!silent) setStatus('checkStatus', 'Checked report-card selections cleared.', true);
+  renderPublishedResults(state.publishedResults, $('studentWelcome').textContent.replace(/^Loaded for\s+/,''));
+}
+function getSelectedPublishedRows(){
+  const idSet = state.selectedPublishedIds;
+  return state.publishedResults.filter(row => idSet.has(String(row.id)));
+}
+function togglePublishedSelection(resultId, checked){
+  const id = String(resultId);
+  if(checked) state.selectedPublishedIds.add(id); else state.selectedPublishedIds.delete(id);
+  updateMetrics();
+  renderPublishedResults(state.publishedResults, $('studentWelcome').textContent.replace(/^Loaded for\s+/,''));
+}
+function selectAllPublishedResults(){
+  const shouldSelect = state.publishedResults.some(row => !state.selectedPublishedIds.has(String(row.id)));
+  if(shouldSelect) state.publishedResults.forEach(row => state.selectedPublishedIds.add(String(row.id))); else state.selectedPublishedIds = new Set();
+  updateMetrics();
+  renderPublishedResults(state.publishedResults, $('studentWelcome').textContent.replace(/^Loaded for\s+/,''));
+}
+function renderPublishedResults(list, fullName=''){
+  state.publishedResults = Array.isArray(list) ? list : [];
+  updateMetrics();
+  $('studentWelcome').textContent = fullName ? `Loaded for ${fullName}` : 'No student loaded yet.';
+  const body = $('publishedResultsBody');
+  if(!state.publishedResults.length){
+    body.innerHTML = '<tr><td colspan="8"><div class="empty">No published result is currently available for this student.</div></td></tr>';
+    return;
+  }
+  body.innerHTML = state.publishedResults.map((row, index) => {
+    const checked = state.selectedPublishedIds.has(String(row.id));
+    const isCurrent = String(state.currentResultId || '') === String(row.id || '');
+    return `
+      <tr class="${checked || isCurrent ? 'selected-row' : ''}">
+        <td><input type="checkbox" ${checked ? 'checked' : ''} onchange="togglePublishedSelection('${esc(row.id)}', this.checked)"></td>
+        <td><strong>${esc(row.examTitle || '')}</strong><div class="muted" style="margin-top:4px">${esc(row.statusMessage || '')}</div></td>
+        <td>${esc(row.examCode || '')}</td>
+        <td>${esc(row.attemptNo || '')}</td>
+        <td><strong>${row.showScoreSummary ? `${esc(row.percentage || 0)}%` : '—'}</strong></td>
+        <td><span class="state-chip ${String(row.status || '').toUpperCase() === 'PASSED' ? 'pass' : 'fail'}">${esc(row.status || '')}</span></td>
+        <td>${esc(formatDate(row.timestamp))}</td>
+        <td><button type="button" class="ghost" onclick="selectPublishedResult(${index})">${isCurrent ? 'Opened' : 'Use This'}</button></td>
+      </tr>`;
+  }).join('');
+}
+window.togglePublishedSelection = togglePublishedSelection;
+window.selectPublishedResult = function(index){
+  const row = state.publishedResults[index];
+  if(!row) return;
+  $('examCode').value = row.examCode || '';
+  $('selectedResultId').value = row.id || '';
+  state.currentResultId = String(row.id || '');
+  renderPublishedResults(state.publishedResults, $('studentWelcome').textContent.replace(/^Loaded for\s+/,''));
+  setStatus('checkStatus', `Selected ${row.examTitle || row.examCode || 'result'}. Click “Open Selected Result”.`, true);
+};
+function renderReview(review){
+  if(!Array.isArray(review) || !review.length){ $('reviewWrap').style.display = 'none'; $('reviewList').innerHTML = ''; return; }
+  $('reviewWrap').style.display = 'block';
+  $('reviewList').innerHTML = review.map(item => `
+    <div class="review-item">
+      <div class="${item.status === 'PASS' ? 'pass' : 'fail'}">Question ${esc(item.qNo)} — ${esc(item.status)}</div>
+      <div style="margin-top:8px"><strong>${esc(item.question)}</strong></div>
+      ${item.imageUrl ? `<img src="${esc(normalizeImageUrl(item.imageUrl))}" class="question-image" alt="Question image" referrerpolicy="no-referrer">` : ''}
+      <div style="margin-top:8px">A. ${esc(item.optionA)}<br>B. ${esc(item.optionB)}<br>C. ${esc(item.optionC)}<br>D. ${esc(item.optionD)}</div>
+      <div style="margin-top:8px"><strong>Your Answer:</strong> ${esc(item.chosen || 'BLANK')}</div>
+      <div><strong>Correct Answer:</strong> ${esc(item.correct)}</div>
+    </div>`).join('');
+}
+function summaryRows(d){
+  return [
+    ['Student Name', d.fullName || '—'],
+    ['Registration ID', d.regId || '—'],
+    ['Username', d.username || '—'],
+    ['Exam Title', d.examTitle || '—'],
+    ['Exam Code', d.examCode || '—'],
+    ['Attempt', d.attemptNo || '—']
+  ];
+}
+function performanceRows(d){
+  const rows = [];
+  rows.push(['Result Status', d.passedStatus || '—', 'Template', getTemplateTheme().name]);
+  if(d.showScoreSummary){
+    rows.push(['Score', `${d.score || 0} / ${d.total || 0}`, 'Percentage', `${d.percentage || 0}%`]);
+    rows.push(['Pass Mark', `${d.passMark || 0}%`, 'Generated', formatDate(new Date())]);
+  }else{
+    rows.push(['Generated', formatDate(new Date()), 'View Mode', 'Protected Summary']);
+  }
+  if(d.allowReview){
+    rows.push(['Passed Questions', d.passedNos || 'None', 'Failed Questions', d.failedNos || 'None']);
+  }
+  return rows;
+}
+function buildTable(rows, extraClass=''){
+  return `<table class="result-table ${extraClass}"><tbody>${rows.map(r => `<tr><th>${esc(r[0])}</th><td>${esc(r[1])}</td>${r[2] !== undefined ? `<th>${esc(r[2])}</th><td>${esc(r[3])}</td>` : ''}</tr>`).join('')}</tbody></table>`;
+}
+function buildSummaryCards(d){
+  const cards = [
+    `<div class="summary-card"><div class="k">Result Status</div><div class="v">${esc(d.passedStatus || '—')}</div></div>`,
+    `<div class="summary-card"><div class="k">Exam Code</div><div class="v">${esc(d.examCode || '—')}</div></div>`,
+    `<div class="summary-card"><div class="k">Attempt</div><div class="v">${esc(d.attemptNo || '—')}</div></div>`
+  ];
+  if(d.showScoreSummary){
+    cards.unshift(`<div class="summary-card"><div class="k">Exam Score</div><div class="v">${esc(`${d.score || 0} / ${d.total || 0}`)}</div></div>`);
+    cards.splice(1, 0, `<div class="summary-card"><div class="k">Percentage</div><div class="v">${esc(`${d.percentage || 0}%`)}</div></div>`);
+    cards.push(`<div class="summary-card"><div class="k">Pass Mark</div><div class="v">${esc(`${d.passMark || 0}%`)}</div></div>`);
+  }
+  return cards.join('');
+}
+function buildResultMarkup(d){
+  const theme = getTemplateTheme();
+  const passed = String(d.passedStatus || '').toUpperCase() === 'PASSED';
+  const brandName = d.brandName || 'Genz EduTech Innovations';
+  const logo = normalizeImageUrl(d.brandLogoUrl || '');
+  const signature = normalizeImageUrl(d.signatureUrl || '');
+  const passport = normalizeImageUrl(d.passportUrl || '');
+  const layout = theme.layout || 'hero';
+  const summaryTable = buildTable(summaryRows(d));
+  const performanceTable = buildTable(performanceRows(d), 'performance-table');
+  const infoPanel = `<section class="panel"><h3>Student Information</h3>${summaryTable}</section>`;
+  const performancePanel = `<section class="panel"><h3>Performance Summary</h3>${performanceTable}</section>`;
+  const passportPanel = passport ? `<aside class="passport-card"><img src="${esc(passport)}" alt="Student passport" referrerpolicy="no-referrer"><div class="cap">Student Passport</div></aside>` : '';
+  const remark = `<div class="remark-box"><strong>Remark / Message:</strong><br>${esc(d.statusMessage || 'No custom message available for this result.')}</div>`;
+  const signatureBlock = `<div class="sign-row"><div class="muted">Result verified from the official published-result portal.</div><div class="signature-box">${signature ? `<img src="${esc(signature)}" alt="Signature" referrerpolicy="no-referrer">` : ''}<div class="signature-line">Authorized Signature</div></div></div>`;
+  let layoutBody = '';
+  if(layout === 'split'){
+    layoutBody = `<div class="identity-band"><div class="sheet-grid">${performancePanel}${infoPanel}</div>${passportPanel}</div>${remark}`;
+  } else if(layout === 'stacked'){
+    layoutBody = `<div style="display:grid;gap:18px">${passportPanel ? `<div style="display:flex;justify-content:flex-end">${passportPanel}</div>` : ''}${infoPanel}${performancePanel}${remark}</div>`;
+  } else if(layout === 'minimal'){
+    layoutBody = `<div style="display:grid;gap:18px">${infoPanel}${passportPanel ? `<div style="display:flex;justify-content:flex-start">${passportPanel}</div>` : ''}${performancePanel}${remark}</div>`;
+  } else if(layout === 'executive'){
+    layoutBody = `<div class="remark-box" style="background:rgba(255,255,255,.7);border-style:solid"><strong>Issued For:</strong> ${esc(d.fullName || 'Student')} • <strong>${esc(d.examTitle || '')}</strong></div><div class="identity-band"><div class="sheet-grid">${infoPanel}${performancePanel}</div>${passportPanel}</div>${remark}`;
+  } else if(layout === 'ribbon'){
+    layoutBody = `<div class="remark-box" style="background:linear-gradient(90deg,rgba(59,130,246,.08),rgba(168,85,247,.1));border-style:solid"><strong>Design Highlight:</strong> ${esc(theme.name)} layout with stronger summary visibility.</div><div class="identity-band"><div class="sheet-grid">${infoPanel}${performancePanel}</div>${passportPanel}</div>${remark}`;
+  } else {
+    layoutBody = `<div class="identity-band"><div class="sheet-grid">${infoPanel}${performancePanel}</div>${passportPanel}</div>${remark}`;
+  }
+  return `
+    <article class="template-shell" style="--theme-header:${theme.header};--theme-border:${theme.border};--theme-paper:${theme.paper};--theme-body:${theme.body};--theme-panel:${theme.panel};--theme-panel-border:${theme.panelBorder};--theme-card-border:${theme.cardBorder};--theme-table-line:${theme.tableLine};--theme-table-head:${theme.tableHead};--theme-table-head-text:${theme.tableHeadText};--theme-table-body:${theme.tableBody};--theme-remark:${theme.remark}">
+      ${logo && layout !== 'minimal' ? `<img src="${esc(logo)}" alt="Watermark" class="template-watermark" referrerpolicy="no-referrer">` : ''}
+      <div class="result-header">
+        <div class="result-header-row" style="align-items:${layout === 'stacked' ? 'flex-start' : 'center'}">
+          <div class="brand-stack">
+            ${logo ? `<img src="${esc(logo)}" alt="Brand logo" class="brand-logo" referrerpolicy="no-referrer">` : ''}
+            <div>
+              <h2>${esc(brandName)}</h2>
+              <div class="result-sub">Official Student Result Slip • ${esc(theme.name)} Design</div>
+              <div class="result-meta-badges">
+                <span class="pill">${esc(d.examTitle || '')}</span>
+                <span class="pill">${esc(d.examCode || '')}</span>
+                <span class="pill">Attempt ${esc(d.attemptNo || '')}</span>
+              </div>
+            </div>
+          </div>
+          <span class="state-chip ${passed ? 'pass' : 'fail'}">${esc(d.passedStatus || '—')}</span>
+        </div>
+      </div>
+      <div class="result-body">
+        <div class="summary-strip">${buildSummaryCards(d)}</div>
+        ${layoutBody}
+        ${signatureBlock}
+      </div>
+    </article>`;
+}
+function rerenderCurrentResult(){
+  updateMetrics();
+  if(!state.currentResult) return;
+  $('resultBox').innerHTML = buildResultMarkup(state.currentResult);
+  renderReview(state.currentResult.allowReview ? (state.currentResult.review || []) : []);
+}
+async function fetchImageDataUrl(url){
+  url = normalizeImageUrl(url);
+  if(!url) return '';
+  try{
+    const res = await fetch(url, { mode:'cors' });
+    const blob = await res.blob();
+    return await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ''));
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }catch(err){ return ''; }
+}
+function buildPdfRowsForResult(data){
+  const rows = [
+    ['Student Name', data.fullName || '', 'Registration ID', data.regId || ''],
+    ['Username', data.username || '', 'Attempt', String(data.attemptNo || '')],
+    ['Exam Title', data.examTitle || '', 'Exam Code', data.examCode || ''],
+    ['Result Status', data.passedStatus || '', 'Template', getTemplateTheme().name]
+  ];
+  if(data.showScoreSummary){
+    rows.push(['Score', `${data.score || 0} / ${data.total || 0}`, 'Percentage', `${data.percentage || 0}%`]);
+    rows.push(['Pass Mark', `${data.passMark || 0}%`, 'Generated', formatDate(new Date())]);
+  } else {
+    rows.push(['Generated', formatDate(new Date()), 'View Mode', 'Protected Summary']);
+  }
+  if(data.allowReview){
+    rows.push(['Passed Questions', data.passedNos || 'None', 'Failed Questions', data.failedNos || 'None']);
+  }
+  return rows;
+}
+async function downloadResultPdf(){
+  if(!state.currentResult) return setStatus('checkStatus', 'Open a result first.');
+  if(!pdfReady()) return setStatus('checkStatus', 'PDF library did not load. Refresh and try again.');
+  const data = state.currentResult;
+  const theme = getTemplateTheme();
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation:'portrait', unit:'pt', format:'a4' });
+  const [logoData, passportData, signatureData] = await Promise.all([
+    fetchImageDataUrl(data.brandLogoUrl || ''),
+    fetchImageDataUrl(data.passportUrl || ''),
+    fetchImageDataUrl(data.signatureUrl || '')
+  ]);
+  doc.setFillColor(theme.tableHeadText === '#0f172a' ? 15 : 29, theme.tableHeadText === '#0f172a' ? 23 : 78, theme.tableHeadText === '#0f172a' ? 42 : 216);
+  doc.rect(0,0,595,128,'F');
+  if(logoData){ try{ doc.addImage(logoData, 'PNG', 38, 24, 58, 58); }catch(err){} }
+  doc.setTextColor(255,255,255);
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(20);
+  doc.text(data.brandName || 'Genz EduTech Innovations', 108, 46);
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(11);
+  doc.text(`Official Student Result Slip — ${theme.name}`, 108, 66);
+  doc.text(`Exam: ${data.examTitle || ''} (${data.examCode || ''})`, 108, 84);
+  doc.text(`Status: ${data.passedStatus || ''}`, 108, 102);
+  if(passportData){ try{ doc.addImage(passportData, 'PNG', 487, 146, 72, 84); }catch(err){} }
+  doc.setTextColor(15,23,42);
+  doc.autoTable({
+    startY: 148,
+    theme:'grid',
+    styles:{ fontSize:10, cellPadding:7, lineColor:[100,116,139], lineWidth:1.1, overflow:'linebreak' },
+    headStyles:{ fillColor:[226,232,240], textColor:[15,23,42] },
+    body: buildPdfRowsForResult(data)
+  });
+  let y = doc.lastAutoTable.finalY + 18;
+  doc.setFont('helvetica','bold');
+  doc.text('Remark / Message', 40, y);
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(10);
+  const lines = doc.splitTextToSize(data.statusMessage || '', 515);
+  doc.text(lines, 40, y + 16);
+  if(signatureData){
+    try{ doc.addImage(signatureData, 'PNG', 385, 700, 160, 50); }catch(err){}
+    doc.setFontSize(9);
+    doc.text('Authorized Signature', 430, 765);
+  }
+  if(data.allowReview && Array.isArray(data.review) && data.review.length){
+    doc.addPage();
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(14);
+    doc.text('Answer Review', 40, 40);
+    doc.autoTable({
+      startY:56,
+      head:[['Q No','Status','Your Answer','Correct','Question']],
+      body:data.review.map(item => [String(item.qNo || ''), item.status || '', item.chosen || 'BLANK', item.correct || '', item.question || '']),
+      theme:'grid',
+      styles:{ fontSize:9, cellPadding:6, lineColor:[100,116,139], lineWidth:1, overflow:'linebreak' },
+      headStyles:{ fillColor:[226,232,240], textColor:[15,23,42] }
+    });
+  }
+  const safeReg = String(data.regId || 'student').replace(/[^a-z0-9_-]+/gi,'_');
+  const safeExam = String(data.examCode || 'result').replace(/[^a-z0-9_-]+/gi,'_');
+  const safeTpl = String(getSelectedTemplate()).replace(/[^a-z0-9_-]+/gi,'_');
+  doc.save(`result_${safeReg}_${safeExam}_${safeTpl}.pdf`);
+}
+async function fetchResultDetailById(resultId){
+  const regId = $('regId').value.trim();
+  const password = $('password').value;
+  return await apiRequest('checkResultPublicById', { resultId, regId, password }, 'POST');
+}
+async function downloadSelectedReportCardPdf(){
+  const selectedRows = getSelectedPublishedRows();
+  if(!selectedRows.length) return setStatus('checkStatus', 'Select one or more published results first.');
+  if(!pdfReady()) return setStatus('checkStatus', 'PDF library did not load. Refresh and try again.');
+  setStatus('checkStatus', 'Preparing combined report card...', true);
+  const details = [];
+  for(const row of selectedRows){
+    const res = await fetchResultDetailById(row.id);
+    if(res.ok && res.data) details.push(res.data);
+  }
+  if(!details.length) return setStatus('checkStatus', 'Could not load the selected results for report-card download.');
+  const first = details[0];
+  const theme = getTemplateTheme();
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation:'portrait', unit:'pt', format:'a4' });
+  const [logoData, signatureData] = await Promise.all([
+    fetchImageDataUrl(first.brandLogoUrl || ''),
+    fetchImageDataUrl(first.signatureUrl || '')
+  ]);
+  doc.setFillColor(theme.tableHeadText === '#0f172a' ? 15 : 29, theme.tableHeadText === '#0f172a' ? 23 : 78, theme.tableHeadText === '#0f172a' ? 42 : 216);
+  doc.rect(0,0,595,118,'F');
+  if(logoData){ try{ doc.addImage(logoData, 'PNG', 38, 22, 56, 56); }catch(err){} }
+  doc.setTextColor(255,255,255);
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(19);
+  doc.text(first.brandName || 'Genz EduTech Innovations', 104, 44);
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(11);
+  doc.text('Combined Student Report Card', 104, 64);
+  doc.text(`Selected Results: ${details.length}`, 104, 82);
+  doc.setTextColor(15,23,42);
+  doc.autoTable({
+    startY: 138,
+    theme:'grid',
+    styles:{ fontSize:10, cellPadding:7, lineColor:[100,116,139], lineWidth:1.1, overflow:'linebreak' },
+    head:[['Exam Title','Exam Code','Attempt','Score','Percentage','Pass Mark','Status']],
+    body: details.map(item => [
+      item.examTitle || '',
+      item.examCode || '',
+      String(item.attemptNo || ''),
+      item.showScoreSummary ? `${item.score || 0} / ${item.total || 0}` : '—',
+      item.showScoreSummary ? `${item.percentage || 0}%` : '—',
+      item.showScoreSummary ? `${item.passMark || 0}%` : '—',
+      item.passedStatus || ''
+    ]),
+    headStyles:{ fillColor:[226,232,240], textColor:[15,23,42] }
+  });
+  let y = doc.lastAutoTable.finalY + 18;
+  doc.setFont('helvetica','bold');
+  doc.text('Student Information', 40, y);
+  doc.autoTable({
+    startY: y + 10,
+    theme:'grid',
+    styles:{ fontSize:10, cellPadding:7, lineColor:[100,116,139], lineWidth:1.1 },
+    body:[
+      ['Student Name', first.fullName || '', 'Registration ID', first.regId || ''],
+      ['Username', first.username || '', 'Selected Results', String(details.length)]
+    ]
+  });
+  if(signatureData){
+    try{ doc.addImage(signatureData, 'PNG', 385, 720, 160, 50); }catch(err){}
+    doc.setFontSize(9);
+    doc.text('Authorized Signature', 430, 785);
+  }
+  const safeReg = String(first.regId || 'student').replace(/[^a-z0-9_-]+/gi,'_');
+  const safeTpl = String(getSelectedTemplate()).replace(/[^a-z0-9_-]+/gi,'_');
+  doc.save(`report_card_${safeReg}_${details.length}_results_${safeTpl}.pdf`);
+  setStatus('checkStatus', `Combined report card prepared with ${details.length} result(s).`, true);
+}
+async function loadMyResults(){
+  const regId = $('regId').value.trim();
+  const password = $('password').value;
+  if(!regId || !password) return setStatus('checkStatus', 'Enter your Registration ID and password first.');
+  setStatus('checkStatus', 'Loading your published results...', true);
+  const res = await apiRequest('listPublishedResultsForStudent', { regId, password }, 'POST');
+  if(!res.ok){
+    state.currentResultId = '';
+    state.currentResult = null;
+    state.selectedPublishedIds = new Set();
+    renderPublishedResults([], '');
+    setStatus('checkStatus', res.message || 'Failed to load published results.');
+    return;
+  }
+  const data = res.data || {};
+  state.selectedPublishedIds = new Set();
+  state.currentResultId = '';
+  renderPublishedResults(data.results || [], data.fullName || '');
+  setStatus('checkStatus', res.message || 'Published results loaded.', true);
+}
+async function openSelectedResult(){
+  const examCode = $('examCode').value.trim();
+  const resultId = $('selectedResultId').value.trim();
+  const regId = $('regId').value.trim();
+  const password = $('password').value;
+  if(!regId || !password) return setStatus('checkStatus', 'Registration ID and password are required.');
+  const action = resultId ? 'checkResultPublicById' : 'checkResultPublic';
+  const payload = resultId ? { resultId, regId, password } : { examCode, regId, password };
+  const res = await apiRequest(action, payload, 'POST');
+  setStatus('checkStatus', res.message, res.ok);
+  if(!res.ok){ $('resultCard').style.display = 'none'; state.currentResult = null; return; }
+  state.currentResult = res.data || {};
+  state.currentResultId = String((res.data && res.data.resultId) || resultId || '');
+  $('resultCard').style.display = 'block';
+  rerenderCurrentResult();
+  renderPublishedResults(state.publishedResults, $('studentWelcome').textContent.replace(/^Loaded for\s+/,''));
+}
+function clearSelection(){
+  $('examCode').value = '';
+  $('selectedResultId').value = '';
+  $('resultCard').style.display = 'none';
+  $('resultBox').innerHTML = '';
+  $('reviewList').innerHTML = '';
+  $('reviewWrap').style.display = 'none';
+  state.currentResult = null;
+  state.currentResultId = '';
+  updateMetrics();
+  renderPublishedResults(state.publishedResults, $('studentWelcome').textContent.replace(/^Loaded for\s+/,''));
+  setStatus('checkStatus', 'Open-result selection cleared.', true);
+}
+function printCurrent(){
+  if(!state.currentResult) return setStatus('checkStatus', 'Open a result first.');
+  const source = document.querySelector('style');
+  const markup = $('resultBox').innerHTML;
+  const title = `${state.currentResult.examTitle || 'Result'} — ${getTemplateTheme().name}`;
+  const win = window.open('', '_blank', 'width=980,height=760');
+  if(!win) return setStatus('checkStatus', 'Allow pop-ups to print the styled result.');
+  const css = source ? source.textContent : '';
+  win.document.open();
+  win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(title)}</title><style>${css}</style></head><body><div id="resultBox">${markup}</div><script>window.onload=function(){setTimeout(function(){window.print();},250);};<\/script></body></html>`);
+  win.document.close();
+}
+$('loadMineBtn').addEventListener('click', loadMyResults);
+$('refreshMineBtn').addEventListener('click', loadMyResults);
+$('selectAllPublishedBtn').addEventListener('click', selectAllPublishedResults);
+$('clearPublishedBtn').addEventListener('click', ()=>clearPublishedSelections(false));
+$('checkBtn').addEventListener('click', openSelectedResult);
+$('downloadPdfBtn').addEventListener('click', downloadResultPdf);
+$('downloadReportCardBtn').addEventListener('click', downloadSelectedReportCardPdf);
+$('printBtn').addEventListener('click', printCurrent);
+$('clearSelectionBtn').addEventListener('click', clearSelection);
+$('resultTemplate').addEventListener('change', rerenderCurrentResult);
+$('resultTemplate').addEventListener('change', updateMetrics);
+$('examCode').addEventListener('input', ()=>{ if($('selectedResultId').value){ $('selectedResultId').value=''; state.currentResultId=''; renderPublishedResults(state.publishedResults, $('studentWelcome').textContent.replace(/^Loaded for\s+/,'')); } });
+(function init(){
+  updateMetrics();
+  const params = new URLSearchParams(location.search);
+  const exam = params.get('exam');
+  if(exam) $('examCode').value = exam;
+})();
+</script>
+</body>
+</html>

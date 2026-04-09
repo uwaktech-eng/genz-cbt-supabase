@@ -1,0 +1,2053 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>CBT Admin Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+<style>
+:root{
+  --bg:#eef3ff;--bg2:#f9fbff;--panel:rgba(255,255,255,.56);--panel-strong:rgba(255,255,255,.72);--line:rgba(150,170,220,.28);--line-2:rgba(255,255,255,.48);--text:#0f172a;--muted:#66758f;
+  --primary:#6d5efc;--primary2:#4f8cff;--success:#15803d;--danger:#dc2626;--warn:#b45309;
+  --soft:rgba(109,94,252,.10);--soft-2:rgba(255,255,255,.42);--shadow:0 20px 48px rgba(37,59,117,.12);--glow:0 1px 0 rgba(255,255,255,.5) inset
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,Arial,sans-serif;color:var(--text);background:radial-gradient(circle at top left, rgba(109,94,252,.16), transparent 30%),radial-gradient(circle at top right, rgba(79,140,255,.14), transparent 26%),linear-gradient(180deg,var(--bg),var(--bg2)) fixed}
+header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.45);backdrop-filter:blur(18px) saturate(145%);-webkit-backdrop-filter:blur(18px) saturate(145%);border-bottom:1px solid var(--line)}
+.top{max-width:1280px;margin:auto;padding:14px 16px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.wrap{max-width:1280px;margin:auto;padding:18px 16px 40px}
+.brand{display:flex;gap:12px;align-items:center}
+.badge{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,var(--primary),#22c1ff)}
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:18px}
+.card{grid-column:span 6;background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:var(--shadow),var(--glow);backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);min-width:0}
+.full{grid-column:1/-1}
+h1,h2,h3{margin:0}
+.muted{color:var(--muted)}
+label{display:block;font-size:14px;font-weight:700;margin:0 0 6px}
+.card input,.card textarea,.card select{width:100%;border:1px solid rgba(160,178,222,.34);border-radius:14px;padding:12px 14px;font-size:15px;background:rgba(255,255,255,.72);box-shadow:inset 0 1px 0 rgba(255,255,255,.65);margin:0 0 12px}
+textarea{min-height:92px;resize:vertical}
+input[type="checkbox"]{width:auto;margin-right:8px}
+.row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.actions{display:flex;flex-wrap:wrap;gap:10px}
+.btn,button{border:none;border-radius:14px;min-height:44px;padding:0 16px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;transition:transform .2s ease, box-shadow .25s ease, background .25s ease, opacity .2s ease;box-shadow:0 10px 24px rgba(79,140,255,.12)}
+button:hover,.btn:hover{transform:translateY(-1px)}
+.primary{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff}
+.success{background:var(--success);color:#fff}
+.danger{background:var(--danger);color:#fff}
+.warn{background:var(--warn);color:#fff}
+.ghost{background:rgba(255,255,255,.56);color:#243b67;border:1px solid rgba(160,178,222,.24);backdrop-filter:blur(10px)}
+.status{font-size:14px;margin-top:8px;min-height:20px}
+.ok{color:var(--success)} .error{color:var(--danger)}
+.hidden{display:none!important}
+.info{padding:12px 14px;border-radius:16px;background:rgba(239,246,255,.72);border:1px solid rgba(173,212,255,.55);color:#175b9e;font-size:14px;backdrop-filter:blur(12px)}
+.pill{display:inline-flex;align-items:center;padding:7px 12px;border-radius:999px;font-size:12px;background:rgba(255,255,255,.55);color:#334155;border:1px solid var(--line);gap:6px;backdrop-filter:blur(10px)}
+.search{max-width:420px}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:18px;margin-top:12px;background:rgba(255,255,255,.62);backdrop-filter:blur(16px)}
+table{width:100%;border-collapse:collapse;min-width:820px}
+th,td{padding:12px;border-bottom:1px solid var(--line);text-align:left;font-size:14px;vertical-align:top}
+.table-wrap th{background:rgba(248,251,255,.9);position:sticky;top:0;z-index:1;backdrop-filter:blur(10px)}
+.snapshot-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:12px}
+.snapshot-card{background:rgba(255,255,255,.72);border:1px solid var(--line);border-radius:18px;padding:12px;box-shadow:var(--shadow)}
+.snapshot-card img{width:100%;height:170px;object-fit:cover;border-radius:12px;border:1px solid var(--line);background:#f8fafc;display:block}
+.snapshot-meta{font-size:12px;color:var(--muted);line-height:1.6;margin-top:10px}
+.role-panel{padding:14px;border:1px solid var(--line);border-radius:18px;background:rgba(248,251,255,.58);margin-bottom:14px}
+.small-btn{min-height:34px;padding:0 12px;border-radius:10px;font-size:13px}
+.auth-shell{max-width:980px;margin:36px auto;padding:0 16px;display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.loader-overlay{position:fixed;inset:0;background:rgba(7,17,34,.35);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:999;padding:16px}
+.loader-overlay.show{display:flex}
+.loader-card{width:min(100%,360px);background:rgba(255,255,255,.7);padding:18px 20px;border-radius:20px;display:flex;align-items:center;gap:12px;border:1px solid var(--line);box-shadow:0 18px 40px rgba(15,23,42,.16);backdrop-filter:blur(18px)}
+.spinner{width:20px;height:20px;border:3px solid #dbe5f4;border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite}
+.code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;background:#f8fafc;border:1px solid var(--line);padding:2px 8px;border-radius:999px;word-break:break-all}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (max-width:1080px){.card{grid-column:1/-1}}
+@media (max-width:780px){.row{grid-template-columns:1fr}.auth-shell{grid-template-columns:1fr}.wrap{padding:14px}.card{padding:16px;border-radius:16px}}
+@media (max-width:520px){.actions{flex-direction:column}.actions>*{width:100%}table{min-width:660px}}
+button[disabled]{transform:none!important;box-shadow:none!important}
+
+/* dashboard cleanup */
+.card.collapsible{padding:0;overflow:hidden;position:relative}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px;border-bottom:1px solid rgba(160,178,222,.2);background:linear-gradient(180deg,rgba(255,255,255,.42),rgba(248,251,255,.28));backdrop-filter:blur(16px)}
+.card-head h2{font-size:1rem}
+.card-head .muted{font-size:13px}
+.card-toggle{min-height:40px;padding:0 14px;border-radius:12px;flex:0 0 auto;background:rgba(255,255,255,.54)!important}
+.card-toggle .toggle-icon{font-size:16px;transition:transform .28s ease}
+.card-body{padding:18px;display:block;overflow:hidden;max-height:4800px;opacity:1;transform:translateY(0);transition:max-height .42s cubic-bezier(.22,1,.36,1),opacity .28s ease,transform .28s ease,padding .28s ease}
+.card.collapsible.is-collapsed .card-body{max-height:0;opacity:0;transform:translateY(-8px);padding-top:0;padding-bottom:0;pointer-events:none}
+.card.collapsible:not(.is-collapsed) .card-toggle .toggle-icon{transform:rotate(180deg)}
+.card.collapsible:hover{box-shadow:0 24px 54px rgba(37,59,117,.13),var(--glow)}
+.card-summary{margin-top:4px;font-size:13px;color:var(--muted)}
+.dashboard-banner{grid-column:1/-1;background:linear-gradient(135deg,rgba(20,27,52,.94),rgba(45,63,134,.92) 52%,rgba(79,140,255,.88));color:#fff;border:1px solid rgba(255,255,255,.12);border-radius:26px;padding:20px;box-shadow:0 24px 50px rgba(15,23,42,.18);backdrop-filter:blur(14px)}
+.dashboard-banner .actions .ghost{background:rgba(255,255,255,.14);color:#fff}
+.dashboard-banner .actions .ghost:hover{background:rgba(255,255,255,.2)}
+.quick-pills{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.quick-pills .pill{background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.18);color:#fff}
+@media (max-width:520px){.card-head{padding:14px 16px}.card-body{padding:16px}}
+
+</style>
+</head>
+<body>
+<div class="loader-overlay" id="loader"><div class="loader-card"><div class="spinner"></div><div id="loaderText">Loading...</div></div></div>
+
+<header>
+  <div class="top">
+    <div class="brand">
+      <div class="badge"></div>
+      <div>
+        <h1>CBT Admin Dashboard</h1>
+        <div class="muted">Exams, settings, candidates, results, review access, pass mark and result checker</div>
+      </div>
+    </div>
+    <div class="actions">
+      <a class="btn ghost" href="index.html">Home</a>
+      <button class="ghost hidden" id="logoutBtn" type="button">Logout</button>
+    </div>
+  </div>
+</header>
+
+<section id="authSection">
+  <div class="auth-shell">
+    <div class="card">
+      <h2>Admin Login</h2>
+      <p class="muted" style="margin:8px 0 16px">Sign in to manage exams and students.</p>
+      <label>Username</label><input id="loginUsername" type="text">
+      <label>Password</label><input id="loginPassword" type="password">
+      <button class="primary" id="loginBtn" type="button">Login</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="ghost" id="forgotBtn" type="button">Forgot / Reset Password</button><button class="ghost hidden" id="changePasswordBtn" type="button">Change Password</button></div>
+      <div id="loginStatus" class="status"></div>
+    </div>
+    <div class="card">
+      <h2>Initial Principal Admin Setup</h2>
+      <p class="muted" style="margin:8px 0 16px">Use your private admin signup key for the first principal admin only. Additional subadmins should be created inside the dashboard by the principal admin.</p>
+      <label>Full Name</label><input id="signupFullName" type="text">
+      <label>Username</label><input id="signupUsername" type="text">
+      <label>Password</label><input id="signupPassword" type="password">
+      <label>Admin Signup Key</label><input id="signupAdminKey" type="password">
+      <button class="success" id="signupBtn" type="button">Sign Up</button>
+      <div id="signupStatus" class="status"></div>
+    </div>
+  </div>
+</section>
+
+<section id="portalSection" class="hidden">
+  <div class="wrap">
+    <div class="grid">
+      <div class="dashboard-banner">
+        <h2 style="margin:0 0 6px">Cleaner Admin Workspace</h2>
+        <div style="opacity:.92;max-width:860px">Sections below can now be expanded only when you need them, so the dashboard stays neat on both desktop and mobile.</div>
+        <div class="quick-pills">
+          <div class="pill">Core setup</div>
+          <div class="pill">Exam management</div>
+          <div class="pill">Questions</div>
+          <div class="pill">Candidates & users</div>
+          <div class="pill">Results & permissions</div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Portal Settings</h2>
+        <div class="info" style="margin:10px 0 14px">Portal lock affects every student.</div>
+        <label><input id="portalLocked" type="checkbox"> Lock Entire CBT Portal</label>
+        <label>Portal Notice</label><textarea id="portalNotice"></textarea>
+        <label>Result Brand Name</label><input id="resultBrandName" type="text" placeholder="e.g. Genz EduTech Innovations">
+        <label>Brand Logo Image URL</label><input id="resultBrandLogoUrl" type="text" placeholder="Paste logo image link for result letterhead">
+        <label>Teacher/Admin Signature Image URL</label><input id="resultSignatureUrl" type="text" placeholder="Paste signature image link for result footer">
+        <label>Browser Tab Icon / Favicon URL</label><input id="siteFaviconUrl" type="text" placeholder="Paste image link for the browser tab icon">
+        <label>Homepage Hero Title</label><input id="siteHeroTitle" type="text" placeholder="e.g. Genz CBT Pro">
+        <label>Homepage Hero Subtitle</label><textarea id="siteHeroSubtitle" placeholder="Short hero description for the public site"></textarea>
+        <label>Homepage Hero Badge</label><input id="siteHeroBadge" type="text" placeholder="e.g. Trusted digital assessment experience">
+        <label>About Section Title</label><input id="siteAboutTitle" type="text" placeholder="About Genz CBT Pro">
+        <label>About Section Content</label><textarea id="siteAboutText" placeholder="Write a short overview about the platform"></textarea>
+        <div class="row">
+          <div><label>CEO Name</label><input id="ceoName" type="text" placeholder="CEO full name"></div>
+          <div><label>CEO Title</label><input id="ceoTitle" type="text" placeholder="CEO title or designation"></div>
+        </div>
+        <label>CEO Profile Image URL</label><input id="ceoImageUrl" type="text" placeholder="Paste CEO photo link">
+        <label>CEO Bio</label><textarea id="ceoBio" placeholder="Short biography of the CEO"></textarea>
+        <label>Contributors JSON</label><textarea id="contributorsJsonText" placeholder='[{"name":"Jane Doe","role":"Developer","imageUrl":"https://...","bio":"Short note"}]'></textarea>
+        <label>Schools / Institutions Using Genz CBT Pro JSON</label><textarea id="institutionsJsonText" placeholder='[{"name":"The Broadoak Schools","logoUrl":"https://...","location":"Owerri"}]'></textarea>
+        <label>Testimonials JSON</label><textarea id="testimonialsJsonText" placeholder='[{"name":"Parent Name","role":"Parent","quote":"Excellent platform","imageUrl":"https://...","videoUrl":"https://www.youtube.com/watch?v=..."}]'></textarea>
+        <label>Tutorial Videos / Playlists JSON</label><textarea id="tutorialVideosJsonText" placeholder='[{"title":"How to use Genz CBT","videoUrl":"https://www.youtube.com/watch?v=...","thumbUrl":"https://...","description":"Quick walkthrough"}]'></textarea>
+        <label>Social Handles JSON</label><textarea id="socialLinksJsonText" placeholder='[{"label":"WhatsApp","url":"https://wa.me/..."},{"label":"Instagram","url":"https://instagram.com/..."}]'></textarea>
+        <div class="row">
+          <div><label>Contact Email</label><input id="contactEmail" type="email" placeholder="contact@example.com"></div>
+          <div><label>Contact Phone</label><input id="contactPhone" type="text" placeholder="+234..."></div>
+        </div>
+        <label>Contact Address</label><textarea id="contactAddress" placeholder="Enter the business or contact address"></textarea>
+        <label>Terms & Conditions Content</label><textarea id="termsContent" placeholder="Full terms and conditions text"></textarea>
+        <label>Privacy Policy Content</label><textarea id="privacyContent" placeholder="Full privacy policy text"></textarea>
+        <label>Cookies Policy Content</label><textarea id="cookiesContent" placeholder="Full cookies policy text"></textarea>
+        <div class="info" style="margin:14px 0 10px">Subadmins will need a security token for protected actions. Principal admin actions will continue without this extra token.</div>
+        <div id="principalTokenPanel" class="role-panel hidden" style="margin:8px 0 12px">
+          <label>Set / Update Subadmin Action Token</label><input id="subadminActionTokenNew" type="password" placeholder="Enter token for subadmins">
+          <label>Confirm Subadmin Action Token</label><input id="subadminActionTokenConfirm" type="password" placeholder="Re-enter token">
+          <label>Subadmin Token Session Expiry (Minutes)</label><input id="subadminTokenTtlMinutes" type="number" min="5" max="1440" value="60">
+          <button class="warn" id="saveSubadminTokenBtn" type="button">Save Subadmin Token</button>
+        </div>
+        <div id="subadminTokenPanel" class="role-panel hidden" style="margin:8px 0 12px">
+          <label>Enter Your Subadmin Action Token</label><input id="subadminActionTokenInput" type="password" placeholder="Enter the token given by the principal admin">
+          <div class="actions"><button class="warn" id="storeSubadminTokenBtn" type="button">Activate Token Session</button><button class="ghost" id="clearSubadminTokenBtn" type="button">Clear Saved Token</button></div>
+        </div>
+        <div id="subadminTokenInfo" class="muted" style="margin-top:8px"></div>
+        <button class="primary" id="saveSettingsBtn" type="button">Save Portal Settings</button>
+        <div id="settingsStatus" class="status"></div>
+      </div>
+
+      <div class="card">
+        <h2>Create New Exam</h2>
+        <label>Exam Title</label><input id="examTitle" type="text" placeholder="e.g. Mock Mathematics CBT">
+        <div class="row">
+          <div><label>Unique Exam Code</label><input id="examCode" type="text" placeholder="e.g. MATH-MOCK-01"></div>
+          <div><label>Duration (Minutes)</label><input id="examDuration" type="number" min="1" value="20"></div>
+        </div>
+        <div class="row">
+          <div><label><input id="examShowSummary" type="checkbox" checked> Show score summary after submit</label></div>
+          <div><label><input id="examAllowReview" type="checkbox"> Allow answer review after submit</label></div>
+          <div><label><input id="examShuffleQuestions" type="checkbox"> Shuffle questions for each student</label></div>
+        </div>
+        <div class="row">
+          <div><label><input id="examCaptureSnapshots" type="checkbox" checked> Upload snapshots to Drive</label></div>
+          <div><label><input id="examRecordAudio" type="checkbox"> Upload audio to Drive</label></div>
+          <div><label><input id="examRecordVideo" type="checkbox"> Upload video to Drive</label></div>
+          <div><label><input id="examRecordScreen" type="checkbox"> Upload screen recording to Drive</label></div>
+        </div>
+        <div class="row">
+          <div><label>Pass Mark (%)</label><input id="examPassMark" type="number" min="0" max="100" value="50"></div>
+          <div></div>
+        </div>
+        <label>Custom Result Message</label><textarea id="examResultMessage" placeholder="Optional message students see with result status"></textarea>
+        <button class="success" id="createExamBtn" type="button">Create Exam</button>
+        <div id="createExamStatus" class="status"></div>
+      </div>
+
+      <div class="card">
+        <h2>Exam Result & Review Settings</h2>
+        <label>Select Exam</label>
+        <select id="examConfigSelect"></select>
+        <div class="row">
+          <div><label><input id="configShowSummary" type="checkbox"> Show score summary after submit</label></div>
+          <div><label><input id="configAllowReview" type="checkbox"> Allow answer review after submit</label></div>
+          <div><label><input id="configShuffleQuestions" type="checkbox"> Shuffle questions for each student</label></div>
+        </div>
+        <div class="row">
+          <div><label><input id="configCaptureSnapshots" type="checkbox"> Upload snapshots to Drive</label></div>
+          <div><label><input id="configRecordAudio" type="checkbox"> Upload audio to Drive</label></div>
+          <div><label><input id="configRecordVideo" type="checkbox"> Upload video to Drive</label></div>
+          <div><label><input id="configRecordScreen" type="checkbox"> Upload screen recording to Drive</label></div>
+        </div>
+        <label>Pass Mark (%)</label>
+        <input id="configPassMark" type="number" min="0" max="100" value="50">
+        <label>Custom Result Message</label>
+        <textarea id="configResultMessage"></textarea>
+        <button class="primary" id="saveExamOptionsBtn" type="button">Save Exam Settings</button>
+        <div id="examOptionsStatus" class="status"></div>
+      </div>
+
+      <div class="card">
+        <h2>Result Checker Link</h2>
+        <div class="muted" style="margin:8px 0 12px">Students will use this link with their <b>Registration ID</b> and <b>student password</b> to view the result report.</div>
+        <label>Select Exam</label>
+        <select id="resultLinkExamSelect"></select>
+        <label>Generated Link</label>
+        <input id="resultCheckerLink" type="text" readonly>
+        <div class="actions">
+          <button class="primary" id="generateResultLinkBtn" type="button">Generate Link</button>
+          <button class="ghost" id="copyResultLinkBtn" type="button">Copy Link</button>
+        </div>
+        <div id="resultLinkStatus" class="status"></div>
+      </div>
+
+      <div class="card full">
+        <div class="actions" style="justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+          <div>
+            <h2>Exams</h2>
+            <div class="muted" style="margin-top:6px">Set current exam, archive, duplicate, configure pass mark and review access.</div>
+          </div>
+          <div class="actions" style="gap:10px;flex-wrap:wrap">
+            <input id="examSearch" class="search" type="text" placeholder="Search exams by code or title">
+            <select id="examStatusFilter" style="min-width:180px">
+              <option value="all">All exam sections</option>
+              <option value="active">Active only</option>
+              <option value="inactive">Inactive only</option>
+              <option value="archived">Archived only</option>
+              <option value="deleted">Deleted only</option>
+            </select>
+          </div>
+        </div>
+        <div id="examsBox"></div>
+      </div>
+
+      <div class="card">
+        <h2>Add Candidates</h2>
+        <div class="row">
+          <div><label>Full Name</label><input id="candidateName" type="text"></div>
+          <div><label>Reg ID</label><input id="candidateRegId" type="text"></div>
+        </div>
+        <label>Student Passport Image URL (optional)</label><input id="candidatePassportUrl" type="text" placeholder="Paste student passport image link">
+        <div class="actions">
+          <button class="primary" id="addCandidateBtn" type="button">Add Candidate</button>
+        </div>
+        <label>Import Candidates CSV</label>
+        <input id="candidateCsvFile" type="file" accept=".csv">
+        <div class="muted" style="margin-top:-4px;margin-bottom:8px">Headers: <b>fullName,regId,passportUrl</b> <span style="opacity:.75">(passportUrl is optional)</span></div>
+        <div class="actions">
+          <button class="ghost" id="importCandidatesBtn" type="button">Import Candidates CSV</button>
+          <button class="ghost" id="downloadCandidatesTemplateBtn" type="button">Download Student CSV Template</button>
+        </div>
+        <div id="candidateStatus" class="status"></div>
+      </div>
+
+      <div class="card">
+        <h2>Student Accounts</h2>
+        <label>Generated Password Length</label><input id="passwordLength" type="number" min="6" value="8">
+        <div class="actions">
+          <button class="success" id="generateAccountsBtn" type="button">Generate Student Passwords</button>
+          <button class="ghost" id="downloadGeneratedBtn" type="button">Download Last CSV</button>
+        </div>
+        <div id="accountsStatus" class="status"></div>
+      </div>
+
+      <div class="card hidden" id="subadminCard">
+        <h2>Add Subadmin</h2>
+        <div class="muted" style="margin:8px 0 14px">Only the principal admin can create and manage subadmins.</div>
+        <label>Full Name</label><input id="subadminFullName" type="text" placeholder="Enter subadmin full name">
+        <label>Username</label><input id="subadminUsername" type="text" placeholder="Enter subadmin username">
+        <label>Password</label><input id="subadminPassword" type="password" placeholder="Create a password">
+        <button class="success" id="createSubadminBtn" type="button">Create Subadmin</button>
+        <div id="subadminStatus" class="status"></div>
+      </div>
+
+      <div class="card full">
+        <div class="actions" style="justify-content:space-between;align-items:center">
+          <div>
+            <h2>Question Builder</h2>
+            <div class="muted" style="margin-top:6px">Questions belong to a specific exam. Select an exam first.</div>
+          </div>
+          <div class="pill">Selected exam: <span id="selectedExamBadge">None</span></div>
+        </div>
+        <div class="row" style="margin-top:14px">
+          <div>
+            <label>Search Exams For Builder</label>
+            <input id="questionExamSearch" type="text" placeholder="Search by exam code or title">
+          </div>
+          <div>
+            <label>Exam Filter</label>
+            <select id="questionExamFilter">
+              <option value="live">Live / Not Deleted</option>
+              <option value="active">Active / Current Only</option>
+              <option value="archived">Archived Only</option>
+              <option value="deleted">Deleted Only</option>
+              <option value="all">All Exams</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Exam For New Questions</label>
+            <select id="questionExamSelect"></select>
+          </div>
+          <div>
+            <label>Import Questions CSV</label>
+            <input id="questionCsvFile" type="file" accept=".csv">
+          </div>
+        </div>
+        <div class="muted" style="margin:-2px 0 10px">Question CSV headers: <b>question,imageUrl,optionA,optionB,optionC,optionD,answer</b></div>
+        <input id="questionEditId" type="hidden">
+        <label>Question</label><textarea id="questionText"></textarea>
+        <label>Image URL (optional)</label><input id="imageUrl" type="text" placeholder="Paste direct image URL">
+        <div class="row">
+          <div><label>Option A</label><input id="optionA" type="text"></div>
+          <div><label>Option B</label><input id="optionB" type="text"></div>
+          <div><label>Option C</label><input id="optionC" type="text"></div>
+          <div><label>Option D</label><input id="optionD" type="text"></div>
+        </div>
+        <label>Correct Answer</label>
+        <select id="correctAnswer"><option value="">Select answer</option><option>A</option><option>B</option><option>C</option><option>D</option></select>
+        <div class="actions">
+          <button class="primary" id="addQuestionBtn" type="button">Add Question</button>
+          <button class="warn hidden" id="updateQuestionBtn" type="button">Save Question Changes</button>
+          <button class="ghost hidden" id="cancelQuestionEditBtn" type="button">Cancel Edit</button>
+          <button class="ghost" id="importQuestionsBtn" type="button">Import Questions CSV</button>
+          <button class="ghost" id="downloadQuestionsTemplateBtn" type="button">Download CBT CSV Template</button>
+          <button class="danger" id="deleteSelectedQuestionsBtn" type="button">Delete Selected</button>
+          <button class="success" id="restoreSelectedQuestionsBtn" type="button">Restore Selected</button>
+          <button class="danger" id="hardDeleteSelectedQuestionsBtn" type="button">Delete Selected Forever</button>
+          <button class="danger" id="clearQuestionsBtn" type="button">Delete All Active Questions</button>
+        </div>
+        <div id="questionStatus" class="status"></div>
+      </div>
+
+      <div class="card full">
+        <div class="actions" style="justify-content:space-between;align-items:center">
+          <h2>Questions In Selected Exam</h2>
+          <div class="actions">
+            <input id="questionSearch" class="search" type="text" placeholder="Search current exam questions">
+            <label class="pill" style="cursor:pointer"><input id="questionShowDeleted" type="checkbox" style="margin:0 6px 0 0"> Show deleted</label>
+            <button class="ghost" id="selectAllQuestionsBtn" type="button">Select All Visible</button>
+          </div>
+        </div>
+        <div id="questionsSelectionInfo" class="muted" style="margin-top:8px"></div>
+        <div id="questionsBox"></div>
+      </div>
+
+      <div class="card">
+        <h2>Permission Code</h2>
+        <div class="muted" style="margin:8px 0 14px">Give one student permission to rewrite a particular exam once.</div>
+        <label>Exam Code</label><input id="permExamCode" type="text" placeholder="e.g. MATH-MOCK-01">
+        <div class="row">
+          <div><label>Reg ID</label><input id="permRegId" type="text"></div>
+          <div><label>Username (optional)</label><input id="permUsername" type="text"></div>
+        </div>
+        <label>Reason</label><input id="permReason" type="text" placeholder="e.g. power outage">
+        <button class="warn" id="createPermissionBtn" type="button">Create Permission Code</button>
+        <div id="permissionStatus" class="status"></div>
+      </div>
+
+      <div class="card">
+        <h2>Results By Exam</h2>
+        <label>Exam Code</label><input id="resultsExamCode" type="text" placeholder="Leave blank to load all results">
+        <div class="actions">
+          <label class="pill" style="cursor:pointer"><input id="resultsShowDeleted" type="checkbox" style="margin:0 6px 0 0"> Show deleted results</label>
+          <button class="primary" id="loadResultsBtn" type="button">Load Results</button>
+          <button class="success" id="exportResultsBtn" type="button">Export Results CSV</button>
+          <button class="ghost" id="exportResultsPdfBtn" type="button">Export Results PDF</button>
+        </div>
+        <div id="resultsStatus" class="status"></div>
+      </div>
+
+      <div class="card full">
+        <div class="actions" style="justify-content:space-between;align-items:center">
+          <h2>Candidates</h2>
+          <div class="actions">
+            <input id="candidateSearch" class="search" type="text" placeholder="Search candidates by name or Reg ID">
+            <button class="ghost" id="exportCandidatesPdfBtn" type="button">Export Student List PDF</button>
+          </div>
+        </div>
+        <div id="candidatesBox"></div>
+      </div>
+
+      <div class="card full">
+        <div class="actions" style="justify-content:space-between;align-items:center">
+          <div>
+            <h2>Users</h2>
+            <div class="muted" style="margin-top:6px">Manage principal admin, subadmin, and student accounts from here.</div>
+          </div>
+          <div class="pill" id="usersRoleBadge">Role: Admin</div>
+        </div>
+        <div class="role-panel hidden" id="usersSubadminPanel">
+          <h3 style="margin-bottom:10px">Add Subadmin</h3>
+          <div class="muted" style="margin:0 0 12px">Only the principal admin can add and manage subadmins.</div>
+          <div class="row">
+            <div><label>Full Name</label><input id="usersSubadminFullName" type="text" placeholder="Enter subadmin full name"></div>
+            <div><label>Username</label><input id="usersSubadminUsername" type="text" placeholder="Enter subadmin username"></div>
+          </div>
+          <label>Password</label><input id="usersSubadminPassword" type="password" placeholder="Create a password">
+          <button class="success" id="usersCreateSubadminBtn" type="button">Create Subadmin</button>
+          <div id="usersSubadminStatus" class="status"></div>
+        </div>
+        <div class="row">
+          <div><h3 style="margin-bottom:10px">Principal Admins & Subadmins</h3><div id="adminsBox"></div></div>
+          <div><h3 style="margin-bottom:10px">Students</h3><div id="studentsBox"></div></div>
+        </div>
+      </div>
+
+      <div class="card full">
+        <div class="actions" style="justify-content:space-between;align-items:center">
+          <h2>Permission Codes</h2>
+          <div class="actions">
+            <button class="danger" id="clearPermissionCodesBtn" type="button">Delete All Permission Codes</button>
+          </div>
+        </div>
+        <div id="permissionCodesBox"></div>
+      </div>
+
+      <div class="card full">
+        <div class="actions" style="justify-content:space-between;align-items:center">
+          <div>
+            <h2>Results Table</h2>
+            <div class="muted" style="margin-top:6px">Manage loaded results: publish, hide, delete, restore, or delete forever.</div>
+          </div>
+          <div class="actions">
+            <button class="ghost" id="selectAllResultsBtn" type="button">Select All Visible</button>
+            <button class="success" id="publishSelectedResultsBtn" type="button">Make Visible in Checker</button>
+            <button class="warn" id="hideSelectedResultsBtn" type="button">Hide from Checker</button>
+            <button class="danger" id="deleteSelectedResultsBtn" type="button">Delete Selected</button>
+            <button class="success" id="restoreSelectedResultsBtn" type="button">Restore Selected</button>
+            <button class="danger" id="hardDeleteSelectedResultsBtn" type="button">Delete Selected Forever</button>
+          </div>
+        </div>
+        <div id="resultsSelectionInfo" class="muted" style="margin-top:8px"></div>
+        <div id="resultsBox"></div>
+      </div>
+
+      <div class="card full">
+        <div class="actions" style="justify-content:space-between;align-items:center">
+          <div>
+            <h2>Proctoring Evidence in Google Drive</h2>
+            <div class="muted" style="margin-top:6px">Load each evidence type below to open the real Google Drive folder and show direct file links on this page. This keeps evidence handling stable while you delete or manage files directly in Drive whenever you need.</div>
+          </div>
+          <div class="actions">
+            <input id="snapshotsExamCode" class="search" type="text" placeholder="Exam code (optional)">
+            <input id="snapshotsRegId" class="search" type="text" placeholder="Reg ID (optional)">
+            <label class="pill" style="cursor:pointer"><input id="snapshotsShowDeleted" type="checkbox" style="margin:0 6px 0 0"> Show deleted tracker rows</label>
+            <button class="primary" id="loadSnapshotsBtn" type="button">Open Snapshot Folder</button>
+            <button class="ghost" id="loadAudioBtn" type="button">Open Audio Folder</button>
+            <button class="ghost" id="loadVideosBtn" type="button">Open Video Folder</button>
+            <button class="ghost" id="loadScreensBtn" type="button">Open Screen Folder</button>
+          </div>
+        </div>
+        <div id="snapshotsStatus" class="status"></div>
+        <div id="snapshotsSelectionInfo" class="muted" style="display:none"></div>
+        <div id="snapshotsBox"></div>
+        <div style="margin-top:18px">
+          <h3 style="margin-bottom:10px">Audio Evidence</h3>
+          <div id="audioStatus" class="status"></div>
+          <div id="audioBox"></div>
+        </div>
+        <div style="margin-top:18px">
+          <h3 style="margin-bottom:10px">Video Evidence</h3>
+          <div id="videoStatus" class="status"></div>
+          <div id="videosBox"></div>
+        </div>
+        <div style="margin-top:18px">
+          <h3 style="margin-bottom:10px">Screen Evidence</h3>
+          <div id="screenStatus" class="status"></div>
+          <div id="screenBox"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="api-client.js"></script>
+<script>
+const APPS_SCRIPT_URL = "/api/router";
+const ADMIN_TOKEN_KEY = "cbt_admin_token_v2";
+const SUBADMIN_ACTION_SESSION_KEY = "cbt_subadmin_action_session_v2";
+const SUBADMIN_ACTION_SESSION_EXP_KEY = "cbt_subadmin_action_session_exp_v2";
+const SUBADMIN_TOKEN_ACTIONS = new Set([
+  "saveSettings","createExam","setExamOptions","setExamActive","archiveExam","deleteExam","restoreExam","hardDeleteExam","bulkHardDeleteExams","setExamLock","duplicateExam",
+  "addCandidate","importCandidates","generateStudentAccounts","setUserActive","deleteUser","restoreUser","hardDeleteUser","adminResetUserPassword",
+  "addQuestion","updateQuestionByExam","deleteQuestionByExam","restoreQuestionByExam","hardDeleteQuestionByExam","importQuestions","clearQuestionsByExam","bulkDeleteQuestionsByExam","bulkRestoreQuestionsByExam","bulkHardDeleteQuestionsByExam",
+  "createPermissionCode","deletePermissionCode","clearPermissionCodes",
+  "bulkSetResultPublished","bulkDeleteResults","bulkRestoreResults","bulkHardDeleteResults",
+  "deleteSnapshot","restoreSnapshot","hardDeleteSnapshot","bulkDeleteSnapshots","bulkRestoreSnapshots","bulkHardDeleteSnapshots"
+]);
+
+let examsData=[], questionsData=[], resultsData=[], candidatesData=[], adminsData=[], studentsData=[], snapshotsData=[], audioData=[], videosData=[], lastGeneratedCsv="", lastGeneratedFilename="student_passwords.csv";
+let currentAdminRole = "";
+let selectedQuestionIds = new Set();
+let selectedDeletedExamCodes = new Set();
+let selectedResultIds = new Set();
+let selectedSnapshotIds = new Set();
+
+let collapsibleCardsReady = false;
+function getCardSummary_(title){
+  const map = {
+    'Portal Settings':'Lock or reopen the full portal and update the notice students will see.',
+    'Create New Exam':'Create a fresh exam, then activate it when students should be allowed to use its exam code.',
+    'Exam Result & Review Settings':'Fine-tune what students can see after submitting each exam.',
+    'Result Checker Link':'Generate the student result-checker link for the selected exam.',
+    'Exams':'Manage active, archived and deleted exams from one place.',
+    'Add Candidates':'Add students one by one or prepare for bulk upload.',
+    'Student Accounts':'Generate passwords and export the latest student login sheet.',
+    'Question Builder':'Add, import, edit or bulk-manage questions for the selected exam.',
+    'Questions In Selected Exam':'View, search, select and restore questions for the selected exam.',
+    'Permission Code':'Generate rewrite permission codes for specific students.',
+    'Results By Exam':'Load and export result sheets in CSV or PDF.',
+    'Candidates':'Search the full student list and export it to PDF.',
+    'Users':'Manage admin and student access with activate or deactivate actions.',
+    'Permission Codes':'Review all rewrite permission codes in one table.',
+    'Results Table':'See the most recently loaded result data.'
+  };
+  return map[title] || 'Open this section when you need it.';
+}
+
+function applyCollapseState(card, collapsed, immediate=false){
+  const body = card.querySelector('.card-body');
+  const toggle = card.querySelector('.card-toggle');
+  if(!body || !toggle) return;
+  const label = toggle.querySelector('.toggle-label');
+
+  if(immediate){
+    card.classList.toggle('is-collapsed', collapsed);
+    body.style.maxHeight = collapsed ? '0px' : 'none';
+    if(label) label.textContent = collapsed ? 'Reveal' : 'Hide';
+    return;
+  }
+
+  if(collapsed){
+    body.style.maxHeight = body.scrollHeight + 'px';
+    requestAnimationFrame(() => {
+      card.classList.add('is-collapsed');
+      body.style.maxHeight = '0px';
+    });
+  } else {
+    card.classList.remove('is-collapsed');
+    body.style.maxHeight = '0px';
+    requestAnimationFrame(() => {
+      body.style.maxHeight = body.scrollHeight + 'px';
+    });
+    const tidy = () => {
+      if(!card.classList.contains('is-collapsed')) body.style.maxHeight = 'none';
+      body.removeEventListener('transitionend', tidy);
+    };
+    body.addEventListener('transitionend', tidy);
+  }
+
+  if(label) label.textContent = collapsed ? 'Reveal' : 'Hide';
+}
+
+function initCollapsibleCards(){
+  if(collapsibleCardsReady) return;
+  collapsibleCardsReady = true;
+  const keepOpen = new Set(['Exams','Question Builder','Users','Exam Snapshots']);
+  document.querySelectorAll('#portalSection .grid > .card').forEach(card => {
+    const first = card.firstElementChild;
+    if(!first) return;
+    let titleEl = null;
+    if(first.tagName === 'H2') titleEl = first;
+    else titleEl = first.querySelector('h2');
+    if(!titleEl) return;
+
+    const title = titleEl.textContent.trim();
+    card.classList.add('collapsible');
+
+    const header = document.createElement('div');
+    header.className = 'card-head';
+    const titleWrap = document.createElement('div');
+    const h = document.createElement('h2');
+    h.textContent = title;
+    const s = document.createElement('div');
+    s.className = 'card-summary';
+    s.textContent = getCardSummary_(title);
+    titleWrap.appendChild(h);
+    titleWrap.appendChild(s);
+
+    const toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'card-toggle ghost';
+    toggle.innerHTML = '<span class="toggle-label">Reveal</span> <span class="toggle-icon">▾</span>';
+
+    header.appendChild(titleWrap);
+    header.appendChild(toggle);
+
+    const body = document.createElement('div');
+    body.className = 'card-body';
+    const nodes = Array.from(card.childNodes);
+    nodes.forEach((node, index) => {
+      if(index === 0) return;
+      body.appendChild(node);
+    });
+    if(first.tagName !== 'H2') body.insertBefore(first, body.firstChild);
+
+    card.innerHTML = '';
+    card.appendChild(header);
+    card.appendChild(body);
+
+    const open = keepOpen.has(title);
+    applyCollapseState(card, !open, true);
+
+    header.addEventListener('click', (event) => {
+      if(event.target.closest('button')) return;
+      applyCollapseState(card, !card.classList.contains('is-collapsed'));
+    });
+    toggle.addEventListener('click', (event) => {
+      event.stopPropagation();
+      applyCollapseState(card, !card.classList.contains('is-collapsed'));
+    });
+  });
+}
+
+const $ = id => document.getElementById(id);
+const loader = $("loader"), loaderText = $("loaderText");
+
+function showLoader(text="Loading..."){ loaderText.textContent=text; loader.classList.add("show"); }
+function hideLoader(){ loader.classList.remove("show"); }
+function getToken(){ return localStorage.getItem(ADMIN_TOKEN_KEY) || ""; }
+function getStoredAdminRole(){ return localStorage.getItem(ADMIN_TOKEN_KEY + "_role") || ""; }
+function getSubadminActionTokenExpiry(){ return localStorage.getItem(SUBADMIN_ACTION_SESSION_EXP_KEY) || ""; }
+function getSubadminActionToken(){
+  const token = localStorage.getItem(SUBADMIN_ACTION_SESSION_KEY) || "";
+  const exp = getSubadminActionTokenExpiry();
+  if(!token || !exp) return "";
+  const time = new Date(exp).getTime();
+  if(!isFinite(time) || time <= Date.now()){
+    clearSubadminActionToken();
+    return "";
+  }
+  return token;
+}
+function setSubadminActionToken(value, expiresAt){ localStorage.setItem(SUBADMIN_ACTION_SESSION_KEY, value || ""); localStorage.setItem(SUBADMIN_ACTION_SESSION_EXP_KEY, expiresAt || ""); }
+function clearSubadminActionToken(){ localStorage.removeItem(SUBADMIN_ACTION_SESSION_KEY); localStorage.removeItem(SUBADMIN_ACTION_SESSION_EXP_KEY); }
+function getEffectiveAdminRole(){ return (currentAdminRole || getStoredAdminRole() || "").toLowerCase(); }
+function setAuth(data){ localStorage.setItem(ADMIN_TOKEN_KEY, data.token); if(data && data.role){ currentAdminRole = data.role; localStorage.setItem(ADMIN_TOKEN_KEY + "_role", data.role); } }
+function clearAuth(){ localStorage.removeItem(ADMIN_TOKEN_KEY); localStorage.removeItem(ADMIN_TOKEN_KEY + "_role"); clearSubadminActionToken(); currentAdminRole = ""; }
+function esc(v){ return String(v==null?"":v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
+function setFavicon(url){ const el = document.getElementById('siteFavicon'); if(el && url) el.href = url; }
+function readableDateTime(value){ if(!value) return ''; const d=new Date(value); return isFinite(d.getTime()) ? d.toLocaleString() : value; }
+
+async function apiRequest(action, payload={}, method="POST"){
+  return window.AppApi.request(action, payload, method);
+}
+function setStatus(id,msg,ok=false){ const el=$(id); if(!el) return; el.className="status "+(ok?"ok":"error"); el.textContent=msg||""; }
+function splitCsvLine(line){ const result=[]; let current="", inQuotes=false; for(let i=0;i<line.length;i++){ const ch=line[i]; if(ch==='"'&&line[i+1]==='"'){ current+='"'; i++; continue; } if(ch==='"'){ inQuotes=!inQuotes; continue; } if(ch===','&&!inQuotes){ result.push(current); current=""; continue; } current+=ch; } result.push(current); return result; }
+function parseCsv(text){ const lines=text.replace(/\r/g,'').split('\n').filter(x=>x.trim()); if(!lines.length) return []; const rows=lines.map(splitCsvLine); const headers=rows[0].map(h=>h.trim()); return rows.slice(1).map(cols=>{ const obj={}; headers.forEach((h,i)=>obj[h]=(cols[i]||"").trim()); return obj; }); }
+async function fileToText(file){ return await file.text(); }
+function downloadText(filename,text){ const blob=new Blob([text], {type:"text/csv;charset=utf-8"}); const a=document.createElement("a"); const url=URL.createObjectURL(blob); a.href=url; a.download=filename; a.click(); URL.revokeObjectURL(url); }
+function downloadCandidateTemplate(){
+  const csv = [
+    'fullName,regId,passportUrl',
+    'Ada Grace,REG001,https://example.com/ada.jpg',
+    'John Michael,REG002,'
+  ].join('\n');
+  downloadText('student_upload_template.csv', csv);
+  setStatus('candidateStatus','Student CSV template downloaded.', true);
+}
+function downloadQuestionTemplate(){
+  const csv = [
+    'question,imageUrl,optionA,optionB,optionC,optionD,answer',
+    'What is 2 + 2?,,3,4,5,6,B',
+    'Which planet is known as the Red Planet?,,Earth,Mars,Jupiter,Venus,B',
+    'Identify the shape with 3 sides.,https://example.com/triangle.png,Square,Circle,Triangle,Rectangle,C'
+  ].join('\n');
+  downloadText('cbt_question_upload_template.csv', csv);
+  setStatus('questionStatus','CBT question CSV template downloaded.', true);
+}
+function boolText(v){ return v ? "Yes" : "No"; }
+
+function pdfReady(){ return window.jspdf && window.jspdf.jsPDF; }
+function exportTablePdf(title, head, body, filename){
+  if(!pdfReady()){ alert("PDF library did not load. Refresh and try again."); return; }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({orientation:"landscape"});
+  doc.setFontSize(16);
+  doc.text(title, 14, 16);
+  doc.autoTable({
+    startY: 22,
+    head: [head],
+    body: body,
+    styles: { fontSize: 9, cellPadding: 2 },
+    headStyles: { fillColor: [79,140,255] }
+  });
+  doc.save(filename);
+}
+
+async function loginAdmin(){
+  showLoader("Signing in...");
+  const res = await apiRequest("login",{username:$("loginUsername").value.trim(), password:$("loginPassword").value, role:"admin"},"POST");
+  hideLoader();
+  setStatus("loginStatus", res.message, res.ok);
+  if(res.ok && res.data){ setAuth(res.data); await showPortal(); }
+}
+async function signupAdmin(){
+  showLoader("Creating admin account...");
+  const res = await apiRequest("signup",{fullName:$("signupFullName").value.trim(), username:$("signupUsername").value.trim(), password:$("signupPassword").value, adminKey:$("signupAdminKey").value.trim(), role:"admin"},"POST");
+  hideLoader();
+  setStatus("signupStatus", res.message, res.ok);
+}
+async function forgotAdminPassword(){
+  const username = prompt('Enter your admin username.');
+  if(username === null) return;
+  const fullName = prompt('Enter your full name exactly as saved.');
+  if(fullName === null) return;
+  const newPassword = prompt('Enter your new password (minimum 6 characters).');
+  if(newPassword === null) return;
+  const confirmPassword = prompt('Confirm your new password.');
+  if(confirmPassword === null) return;
+  if(newPassword !== confirmPassword) return setStatus('loginStatus','Passwords do not match.');
+  showLoader('Resetting password...');
+  const res = await apiRequest('resetForgottenPassword',{username:username.trim(), fullName:fullName.trim(), newPassword:newPassword, role:'admin'},'POST');
+  hideLoader();
+  setStatus('loginStatus', res.message, res.ok);
+  if(res.ok){ $('loginUsername').value = username.trim(); $('loginPassword').value = ''; }
+}
+
+async function changeOwnAdminPassword(){
+  const currentPassword = prompt('Enter your current password.');
+  if(currentPassword === null) return;
+  const newPassword = prompt('Enter your new password (minimum 6 characters).');
+  if(newPassword === null) return;
+  const confirmPassword = prompt('Confirm your new password.');
+  if(confirmPassword === null) return;
+  if(newPassword !== confirmPassword) return alert('Passwords do not match.');
+  showLoader('Updating password...');
+  const res = await apiRequest('changePassword',{currentPassword, newPassword},'POST');
+  hideLoader();
+  if(res.ok && res.data) setAuth(res.data);
+  alert(res.message);
+}
+
+async function resetManagedUserPassword(username){
+  const newPassword = prompt('Enter a new password for ' + username + ' (minimum 6 characters).');
+  if(newPassword === null) return;
+  const confirmPassword = prompt('Confirm the new password for ' + username + '.');
+  if(confirmPassword === null) return;
+  if(newPassword !== confirmPassword) return alert('Passwords do not match.');
+  showLoader('Resetting user password...');
+  const res = await apiRequest('adminResetUserPassword',{username, newPassword},'POST');
+  hideLoader();
+  alert(res.message);
+}
+async function createSubadmin(){
+  if(getEffectiveAdminRole() !== "principal_admin") return setStatus("subadminStatus", "Only the principal admin can create subadmins.");
+  const fullNameEl = $("usersSubadminFullName") || $("subadminFullName");
+  const usernameEl = $("usersSubadminUsername") || $("subadminUsername");
+  const passwordEl = $("usersSubadminPassword") || $("subadminPassword");
+  showLoader("Creating subadmin account...");
+  const res = await apiRequest("signup",{fullName:(fullNameEl?.value||"").trim(), username:(usernameEl?.value||"").trim(), password:passwordEl?.value||"", role:"subadmin", token:getToken()},"POST");
+  hideLoader();
+  setStatus("subadminStatus", res.message, res.ok);
+  if($("usersSubadminStatus")) setStatus("usersSubadminStatus", res.message, res.ok);
+  if(res.ok){
+    if(fullNameEl) fullNameEl.value="";
+    if(usernameEl) usernameEl.value="";
+    if(passwordEl) passwordEl.value="";
+    await loadUsers();
+  }
+}
+async function validatePortal(){
+  const token=getToken(); if(!token) return false;
+  const res=await apiRequest("validateSession",{token},"POST");
+  const role = res && res.data ? (res.data.role || "") : "";
+  if(!res.ok || !res.data || !["principal_admin","subadmin","admin"].includes(role)){ clearAuth(); return false; }
+  currentAdminRole = role;
+  localStorage.setItem(ADMIN_TOKEN_KEY + "_role", role);
+  return true;
+}
+async function logoutCurrent(){ showLoader("Signing out..."); await apiRequest("logout",{token:getToken()},"POST"); hideLoader(); clearAuth(); location.reload(); }
+
+async function showPortal(){
+  $("authSection").classList.add("hidden");
+  $("portalSection").classList.remove("hidden");
+  $("logoutBtn").classList.remove("hidden");
+  if($("changePasswordBtn")) $("changePasswordBtn").classList.remove("hidden");
+  if(!currentAdminRole) currentAdminRole = getStoredAdminRole();
+  const role = getEffectiveAdminRole();
+  if($("subadminCard")) $("subadminCard").classList.add("hidden");
+  if($("usersSubadminPanel")) $("usersSubadminPanel").classList.toggle("hidden", role !== "principal_admin");
+  if($("principalTokenPanel")) $("principalTokenPanel").classList.toggle("hidden", role !== "principal_admin");
+  if($("subadminTokenPanel")) $("subadminTokenPanel").classList.toggle("hidden", role !== "subadmin");
+  if($("usersRoleBadge")) $("usersRoleBadge").textContent = role === 'principal_admin' ? 'Role: Principal Admin' : (role === 'subadmin' ? 'Role: Subadmin' : 'Role: Admin');
+  initCollapsibleCards();
+  await refreshAll();
+}
+async function refreshAll(){
+  showLoader("Loading dashboard...");
+  await Promise.all([loadSettings(), loadExams(), loadCandidates(), loadUsers(), loadPermissionCodes()]);
+  hideLoader();
+}
+async function loadSettings(){
+  const res=await apiRequest("getSettings",{},"GET");
+  if(res.ok && res.data){
+    $("portalLocked").checked=!!res.data.portalLocked;
+    $("portalNotice").value=res.data.portalNotice||"";
+    if($("resultBrandName")) $("resultBrandName").value = res.data.resultBrandName || "Genz EduTech Innovations";
+    if($("resultBrandLogoUrl")) $("resultBrandLogoUrl").value = res.data.resultBrandLogoUrl || "";
+    if($("resultSignatureUrl")) $("resultSignatureUrl").value = res.data.resultSignatureUrl || "";
+    if($("siteFaviconUrl")) $("siteFaviconUrl").value = res.data.siteFaviconUrl || "";
+    if($("siteHeroTitle")) $("siteHeroTitle").value = res.data.siteHeroTitle || "";
+    if($("siteHeroSubtitle")) $("siteHeroSubtitle").value = res.data.siteHeroSubtitle || "";
+    if($("siteHeroBadge")) $("siteHeroBadge").value = res.data.siteHeroBadge || "";
+    if($("siteAboutTitle")) $("siteAboutTitle").value = res.data.siteAboutTitle || "";
+    if($("siteAboutText")) $("siteAboutText").value = res.data.siteAboutText || "";
+    if($("ceoName")) $("ceoName").value = res.data.ceoName || "";
+    if($("ceoTitle")) $("ceoTitle").value = res.data.ceoTitle || "";
+    if($("ceoImageUrl")) $("ceoImageUrl").value = res.data.ceoImageUrl || "";
+    if($("ceoBio")) $("ceoBio").value = res.data.ceoBio || "";
+    if($("contributorsJsonText")) $("contributorsJsonText").value = res.data.contributorsJsonText || '[]';
+    if($("institutionsJsonText")) $("institutionsJsonText").value = res.data.institutionsJsonText || '[]';
+    if($("testimonialsJsonText")) $("testimonialsJsonText").value = res.data.testimonialsJsonText || '[]';
+    if($("tutorialVideosJsonText")) $("tutorialVideosJsonText").value = res.data.tutorialVideosJsonText || '[]';
+    if($("socialLinksJsonText")) $("socialLinksJsonText").value = res.data.socialLinksJsonText || '[]';
+    if($("contactEmail")) $("contactEmail").value = res.data.contactEmail || '';
+    if($("contactPhone")) $("contactPhone").value = res.data.contactPhone || '';
+    if($("contactAddress")) $("contactAddress").value = res.data.contactAddress || '';
+    if($("termsContent")) $("termsContent").value = res.data.termsContent || '';
+    if($("privacyContent")) $("privacyContent").value = res.data.privacyContent || '';
+    if($("cookiesContent")) $("cookiesContent").value = res.data.cookiesContent || '';
+    if($("subadminTokenTtlMinutes")) $("subadminTokenTtlMinutes").value = res.data.subadminActionTokenTtlMinutes || 60;
+    setFavicon(res.data.siteFaviconUrl || res.data.resultBrandLogoUrl || '');
+    renderSubadminTokenInfo(res.data);
+  }
+}
+async function saveSettings(){
+  showLoader("Saving settings...");
+  const res=await apiRequest("saveSettings",{
+    portalLocked:$("portalLocked").checked,
+    portalNotice:$("portalNotice").value.trim(),
+    resultBrandName:$("resultBrandName")?.value.trim() || "",
+    resultBrandLogoUrl:$("resultBrandLogoUrl")?.value.trim() || "",
+    resultSignatureUrl:$("resultSignatureUrl")?.value.trim() || "",
+    siteFaviconUrl:$("siteFaviconUrl")?.value.trim() || "",
+    siteHeroTitle:$("siteHeroTitle")?.value.trim() || "",
+    siteHeroSubtitle:$("siteHeroSubtitle")?.value.trim() || "",
+    siteHeroBadge:$("siteHeroBadge")?.value.trim() || "",
+    siteAboutTitle:$("siteAboutTitle")?.value.trim() || "",
+    siteAboutText:$("siteAboutText")?.value || "",
+    ceoName:$("ceoName")?.value.trim() || "",
+    ceoTitle:$("ceoTitle")?.value.trim() || "",
+    ceoImageUrl:$("ceoImageUrl")?.value.trim() || "",
+    ceoBio:$("ceoBio")?.value || "",
+    contributorsJsonText:$("contributorsJsonText")?.value.trim() || '[]',
+    institutionsJsonText:$("institutionsJsonText")?.value.trim() || '[]',
+    testimonialsJsonText:$("testimonialsJsonText")?.value.trim() || '[]',
+    tutorialVideosJsonText:$("tutorialVideosJsonText")?.value.trim() || '[]',
+    socialLinksJsonText:$("socialLinksJsonText")?.value.trim() || '[]',
+    contactEmail:$("contactEmail")?.value.trim() || '',
+    contactPhone:$("contactPhone")?.value.trim() || '',
+    contactAddress:$("contactAddress")?.value || '',
+    termsContent:$("termsContent")?.value || '',
+    privacyContent:$("privacyContent")?.value || '',
+    cookiesContent:$("cookiesContent")?.value || '',
+    subadminActionTokenTtlMinutes:$("subadminTokenTtlMinutes")?.value || 60
+  },"POST");
+  hideLoader(); setStatus("settingsStatus", res.message, res.ok);
+  if(res.ok && res.data){ setFavicon(res.data.siteFaviconUrl || res.data.resultBrandLogoUrl || ''); renderSubadminTokenInfo(res.data); }
+}
+function renderSubadminTokenInfo(data){
+  if(!$("subadminTokenInfo")) return;
+  const role = getEffectiveAdminRole();
+  const hasConfigured = !!(data && data.hasSubadminActionToken);
+  const ttl = Number(data && data.subadminActionTokenTtlMinutes || 60);
+  if(role === 'principal_admin'){
+    $("subadminTokenInfo").textContent = hasConfigured ? `A subadmin action token is configured. Each activated subadmin session expires after ${ttl} minute(s).` : 'No subadmin action token has been configured yet.';
+  }else if(role === 'subadmin'){
+    const savedExp = getSubadminActionTokenExpiry();
+    const hasSaved = !!getSubadminActionToken();
+    $("subadminTokenInfo").textContent = hasConfigured ? (hasSaved ? `Your action-token session is active until ${readableDateTime(savedExp)}.` : `Protected actions require the token set by the principal admin. Each session expires after ${ttl} minute(s).`) : 'The principal admin has not configured a subadmin action token yet.';
+  }else{
+    $("subadminTokenInfo").textContent = '';
+  }
+}
+
+async function saveSubadminSecurityToken(){
+  if(getEffectiveAdminRole() !== 'principal_admin') return setStatus('settingsStatus','Only the principal admin can set the subadmin action token.');
+  const newToken = ($("subadminActionTokenNew")?.value || '').trim();
+  const confirmToken = ($("subadminActionTokenConfirm")?.value || '').trim();
+  const ttlMinutes = Number(($('subadminTokenTtlMinutes')?.value || '60').trim()) || 60;
+  if(!newToken) return setStatus('settingsStatus','Enter a token for subadmins.');
+  if(newToken !== confirmToken) return setStatus('settingsStatus','Token confirmation does not match.');
+  showLoader('Saving subadmin token...');
+  const res = await apiRequest('saveSubadminActionToken',{newToken, ttlMinutes},'POST');
+  hideLoader();
+  setStatus('settingsStatus', res.message, res.ok);
+  if(res.ok){
+    if($("subadminActionTokenNew")) $("subadminActionTokenNew").value='';
+    if($("subadminActionTokenConfirm")) $("subadminActionTokenConfirm").value='';
+    await loadSettings();
+  }
+}
+
+async function storeLocalSubadminToken(){
+  if(getEffectiveAdminRole() !== 'subadmin') return;
+  const token = ($("subadminActionTokenInput")?.value || '').trim();
+  if(!token) return setStatus('settingsStatus','Enter the action token first.');
+  showLoader('Activating token session...');
+  const res = await apiRequest('activateSubadminActionToken',{actionToken:token},'POST');
+  hideLoader();
+  if(res.ok && res.data){
+    setSubadminActionToken(res.data.actionSessionToken, res.data.actionSessionExpiresAt);
+    if($("subadminActionTokenInput")) $("subadminActionTokenInput").value='';
+    renderSubadminTokenInfo({hasSubadminActionToken:true, subadminActionTokenTtlMinutes:res.data.subadminActionTokenTtlMinutes});
+  }
+  setStatus('settingsStatus', res.message, res.ok);
+}
+
+function clearStoredSubadminToken(){
+  clearSubadminActionToken();
+  renderSubadminTokenInfo({hasSubadminActionToken:true, subadminActionTokenTtlMinutes:Number($("subadminTokenTtlMinutes")?.value || 60)});
+  setStatus('settingsStatus','Saved subadmin token session cleared from this device.', true);
+}
+async function createExam(){
+  showLoader("Creating exam...");
+  const res=await apiRequest("createExam",{
+    title:$("examTitle").value.trim(),
+    examCode:$("examCode").value.trim(),
+    durationMinutes:$("examDuration").value,
+    showScoreSummary:$("examShowSummary").checked,
+    allowReview:$("examAllowReview").checked,
+    shuffleQuestions:$("examShuffleQuestions").checked,
+    captureSnapshots:$("examCaptureSnapshots").checked,
+    recordAudio:$("examRecordAudio").checked,
+    recordVideo:$("examRecordVideo").checked,
+    recordScreen:$("examRecordScreen").checked,
+    passMark:$("examPassMark").value,
+    resultMessage:$("examResultMessage").value.trim()
+  },"POST");
+  hideLoader(); setStatus("createExamStatus", res.message, res.ok);
+  if(res.ok){
+    $("examTitle").value=""; $("examCode").value=""; $("examDuration").value=20;
+    $("examShowSummary").checked=true; $("examAllowReview").checked=false; $("examShuffleQuestions").checked=false; $("examCaptureSnapshots").checked=true; $("examRecordAudio").checked=false; $("examRecordVideo").checked=false; $("examRecordScreen").checked=false; $("examPassMark").value=50; $("examResultMessage").value="";
+    await loadExams();
+  }
+}
+async function loadExams(){
+  selectedDeletedExamCodes.clear();
+  const currentQuestionExam = $("questionExamSelect").value || "";
+  const currentConfigExam = $("examConfigSelect").value || "";
+  const currentLinkExam = $("resultLinkExamSelect").value || "";
+  const res=await apiRequest("listExams",{},"GET");
+  if(!res.ok){ $("examsBox").innerHTML=`<div class="status error">${esc(res.message)}</div>`; return; }
+  examsData = res.data || [];
+  renderExamSelects(currentQuestionExam, currentConfigExam, currentLinkExam);
+  renderExams();
+}
+function getQuestionBuilderExamPool(){
+  const mode = $("questionExamFilter") ? $("questionExamFilter").value : "live";
+  return examsData.filter(e => {
+    if(mode === 'active') return !e.isDeleted && (e.isActive || e.isCurrent);
+    if(mode === 'archived') return !e.isDeleted && e.isArchived;
+    if(mode === 'deleted') return !!e.isDeleted;
+    if(mode === 'all') return true;
+    return !e.isDeleted;
+  });
+}
+function renderQuestionExamOptions(preferredExam=""){
+  const select = $("questionExamSelect");
+  if(!select) return;
+  const pool = getQuestionBuilderExamPool();
+  const search = ($("questionExamSearch")?.value || '').trim().toLowerCase();
+  const filtered = pool.filter(e => !search || `${e.examCode} ${e.title}`.toLowerCase().includes(search));
+  const current = filtered.find(e => e.examCode === preferredExam) || filtered.find(e => e.isActive || e.isCurrent) || filtered[0] || null;
+  select.innerHTML = ['<option value="">Select exam</option>'].concat(filtered.map(e => `<option value="${esc(e.examCode)}">${esc(e.examCode)} — ${esc(e.title)}</option>`)).join('');
+  select.value = current ? current.examCode : '';
+  $("selectedExamBadge").textContent = select.value || 'None';
+}
+function renderExamSelects(questionExam="", configExam="", linkExam=""){
+  const availableExams = examsData.filter(e => !e.isDeleted);
+  const current = availableExams.find(e => e.isActive || e.isCurrent);
+  const defaultExam = current ? current.examCode : (availableExams[0]?.examCode || "");
+  const makeOptions = () => ['<option value="">Select exam</option>'].concat(availableExams.map(e => `<option value="${esc(e.examCode)}">${esc(e.examCode)} — ${esc(e.title)}</option>`)).join("");
+
+  renderQuestionExamOptions(questionExam || defaultExam);
+  $("examConfigSelect").innerHTML = makeOptions();
+  $("resultLinkExamSelect").innerHTML = makeOptions();
+
+  $("examConfigSelect").value = availableExams.some(e => e.examCode === configExam) ? configExam : defaultExam;
+  $("resultLinkExamSelect").value = availableExams.some(e => e.examCode === linkExam) ? linkExam : defaultExam;
+
+  $("selectedExamBadge").textContent = $("questionExamSelect").value || "None";
+  if((!$("permExamCode").value || !availableExams.some(e => e.examCode === $("permExamCode").value)) && defaultExam) $("permExamCode").value = defaultExam;
+  if((!$("resultsExamCode").value || !availableExams.some(e => e.examCode === $("resultsExamCode").value)) && defaultExam) $("resultsExamCode").value = defaultExam;
+  if(!$("snapshotsExamCode").value && defaultExam) $("snapshotsExamCode").value = defaultExam;
+  loadSelectedExamConfig();
+  generateResultCheckerLink(false);
+}
+
+function renderExams(){
+  if(!examsData.length){ $("examsBox").innerHTML='<div class="muted">No exams created yet.</div>'; return; }
+
+  const search = ($("examSearch")?.value || '').trim().toLowerCase();
+  const mode = $("examStatusFilter")?.value || 'all';
+  const matchesSearch = (e) => !search || `${e.examCode || ''} ${e.title || ''}`.toLowerCase().includes(search);
+
+  let activeExams = examsData.filter(e => !e.isDeleted && (e.isActive || e.isCurrent) && matchesSearch(e));
+  let inactiveExams = examsData.filter(e => !e.isDeleted && !(e.isActive || e.isCurrent) && matchesSearch(e));
+  let deletedExams = examsData.filter(e => e.isDeleted && matchesSearch(e));
+
+  if(mode === 'active') { inactiveExams = []; deletedExams = []; }
+  else if(mode === 'inactive') { activeExams = []; deletedExams = []; }
+  else if(mode === 'archived') {
+    activeExams = activeExams.filter(e => e.isArchived);
+    inactiveExams = inactiveExams.filter(e => e.isArchived);
+    deletedExams = [];
+  }
+  else if(mode === 'deleted') { activeExams = []; inactiveExams = []; }
+
+  const buildTable = (list, type='active') => {
+    if(!list.length){
+      const msg = type === 'deleted' ? 'No deleted exams yet.' : (type === 'inactive' ? 'No inactive exams available.' : 'No active exams available.');
+      return `<div class="muted" style="padding:14px 2px">${msg}</div>`;
+    }
+
+    let html = `<div class="table-wrap"><table><thead><tr>${type === 'deleted' ? '<th>Select</th>' : ''}<th>Exam Code</th><th>Title</th><th>Duration</th><th>Summary</th><th>Review</th><th>Pass Mark</th><th>Evidence</th><th>Status</th><th>Actions</th></tr></thead><tbody>`;
+
+    list.forEach(e => {
+      const isActive = !!(e.isActive || e.isCurrent);
+      const evidence = [e.captureSnapshots ? 'Snapshots' : '', e.recordAudio ? 'Audio' : '', e.recordVideo ? 'Video' : '', e.recordScreen ? 'Screen' : ''].filter(Boolean).join(' + ') || 'None';
+      const status = type === 'deleted'
+        ? 'Deleted'
+        : `${isActive ? 'Active' : 'Inactive'} • ${e.isArchived ? 'Archived' : 'Live'} • ${e.examLocked ? 'Locked' : 'Open'}`;
+
+      const activateBtn = isActive
+        ? `<button class="small-btn warn" type="button" onclick="toggleExamActive('${esc(e.examCode)}', false)">Deactivate</button>`
+        : `<button class="small-btn success" type="button" onclick="toggleExamActive('${esc(e.examCode)}', true)">Activate</button>`;
+
+      const actions = type === 'deleted'
+        ? `<button class="small-btn success" type="button" onclick="restoreExamItem('${esc(e.examCode)}')">Restore Exam</button>
+           <button class="small-btn danger" type="button" onclick="hardDeleteExamItem('${esc(e.examCode)}')">Delete Forever</button>`
+        : `${activateBtn}
+          <button class="small-btn ghost" type="button" onclick="pickExamForQuestions('${esc(e.examCode)}')">Use In Builder</button>
+          <button class="small-btn ghost" type="button" onclick="loadExamIntoConfig('${esc(e.examCode)}')">Load In Settings</button>
+          <button class="small-btn ${e.examLocked ? 'success' : 'warn'}" type="button" onclick="toggleExamLock('${esc(e.examCode)}', ${e.examLocked ? 'false':'true'})">${e.examLocked ? 'Unlock' : 'Lock'}</button>
+          <button class="small-btn warn" type="button" onclick="duplicateExamPrompt('${esc(e.examCode)}')">Duplicate</button>
+          <button class="small-btn ${e.isArchived ? 'success':'danger'}" type="button" onclick="toggleArchiveExam('${esc(e.examCode)}', ${e.isArchived ? 'false':'true'})">${e.isArchived ? 'Restore Archive':'Archive'}</button>
+          <button class="small-btn danger" type="button" onclick="deleteExamItem('${esc(e.examCode)}')">Delete Exam</button>`;
+
+      html += `<tr>
+        ${type === 'deleted' ? `<td><label class="pill" style="cursor:pointer"><input type="checkbox" ${selectedDeletedExamCodes.has(String(e.examCode)) ? 'checked' : ''} onchange="toggleDeletedExamSelection('${esc(String(e.examCode))}', this.checked)" style="margin:0 6px 0 0">Select</label></td>` : ''}
+        <td><span class="code">${esc(e.examCode)}</span></td>
+        <td>${esc(e.title)}</td>
+        <td>${esc(e.durationMinutes)} mins</td>
+        <td>${boolText(e.showScoreSummary)}</td>
+        <td>${boolText(e.allowReview)}</td>
+        <td>${esc(e.passMark)}%</td>
+        <td>${esc(status)}</td>
+        <td><div class="actions">${actions}</div></td>
+      </tr>`;
+    });
+
+    return html + '</tbody></table></div>';
+  };
+
+  const noFilteredResults = !activeExams.length && !inactiveExams.length && !deletedExams.length;
+  $("examsBox").innerHTML = `${noFilteredResults ? `<div class="muted" style="padding:8px 2px 14px">No exams matched your current search/filter.</div>` : ''}
+    <div class="card" style="margin-top:12px;padding:16px;border-radius:16px;background:#fcfdff;box-shadow:none">
+      <div class="actions" style="justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px">
+        <div>
+          <h3 style="margin:0">Active Exams</h3>
+          <div class="muted" style="margin-top:4px">Students can unlock any exam in this section using its exam code.</div>
+        </div>
+        <div class="pill">${activeExams.length} active</div>
+      </div>
+      ${buildTable(activeExams, 'active')}
+    </div>
+
+    <div class="card" style="margin-top:16px;padding:16px;border-radius:16px;background:#f8fbff;box-shadow:none">
+      <div class="actions" style="justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px">
+        <div>
+          <h3 style="margin:0">Inactive Exams</h3>
+          <div class="muted" style="margin-top:4px">These exams exist in the system but are not open for students yet.</div>
+        </div>
+        <div class="pill">${inactiveExams.length} inactive</div>
+      </div>
+      ${buildTable(inactiveExams, 'inactive')}
+    </div>
+
+    <div class="card" style="margin-top:16px;padding:16px;border-radius:16px;background:#fffaf5;box-shadow:none;border-style:dashed">
+      <div class="actions" style="justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px">
+        <div>
+          <h3 style="margin:0">Deleted Exams</h3>
+          <div class="muted" style="margin-top:4px">Deleted exams stay here until restored or permanently deleted.</div>
+        </div>
+        <div class="actions">
+          <button class="ghost" type="button" onclick="selectAllDeletedExams()">Select All Deleted</button>
+          <button class="danger" type="button" onclick="hardDeleteSelectedDeletedExams()">Delete Selected Forever</button>
+          <div class="pill" style="background:#fff7ed;color:#b45309;border-color:#fed7aa">${deletedExams.length} deleted</div>
+        </div>
+      </div>
+      <div id="deletedExamSelectionInfo" class="muted" style="margin-bottom:8px"></div>
+      ${buildTable(deletedExams, 'deleted')}
+    </div>`;
+
+  updateDeletedExamSelectionInfo();
+}
+function loadSelectedExamConfig(){
+  const examCode = $("examConfigSelect").value;
+  const exam = examsData.find(e => e.examCode === examCode);
+  if(!exam){ $("configShowSummary").checked = true; $("configAllowReview").checked = false; $("configShuffleQuestions").checked = false; $("configCaptureSnapshots").checked = true; $("configRecordAudio").checked = false; $("configRecordVideo").checked = false; $("configRecordScreen").checked = false; $("configPassMark").value = 50; $("configResultMessage").value=""; return; }
+  $("configShowSummary").checked = !!exam.showScoreSummary;
+  $("configAllowReview").checked = !!exam.allowReview;
+  $("configShuffleQuestions").checked = !!exam.shuffleQuestions;
+  $("configCaptureSnapshots").checked = exam.captureSnapshots !== false;
+  $("configRecordAudio").checked = !!exam.recordAudio;
+  $("configRecordVideo").checked = !!exam.recordVideo;
+  $("configRecordScreen").checked = !!exam.recordScreen;
+  $("configPassMark").value = exam.passMark ?? 50;
+  $("configResultMessage").value = exam.resultMessage || "";
+}
+function loadExamIntoConfig(examCode){
+  $("examConfigSelect").value = examCode;
+  loadSelectedExamConfig();
+  window.scrollTo({top:$("examConfigSelect").getBoundingClientRect().top + window.scrollY - 100, behavior:"smooth"});
+}
+async function saveExamOptions(){
+  const examCode = $("examConfigSelect").value.trim();
+  if(!examCode) return setStatus("examOptionsStatus","Select an exam first.");
+  showLoader("Saving exam settings...");
+  const res = await apiRequest("setExamOptions",{
+    examCode,
+    showScoreSummary:$("configShowSummary").checked,
+    allowReview:$("configAllowReview").checked,
+    shuffleQuestions:$("configShuffleQuestions").checked,
+    captureSnapshots:$("configCaptureSnapshots").checked,
+    recordAudio:$("configRecordAudio").checked,
+    recordVideo:$("configRecordVideo").checked,
+    recordScreen:$("configRecordScreen").checked,
+    passMark:$("configPassMark").value,
+    resultMessage:$("configResultMessage").value.trim()
+  },"POST");
+  hideLoader();
+  setStatus("examOptionsStatus", res.message, res.ok);
+  if(res.ok) await loadExams();
+}
+async function toggleExamActive(examCode, active){
+  showLoader(active ? 'Activating exam...' : 'Deactivating exam...');
+  const res = await apiRequest('setExamActive',{examCode, active},'POST');
+  hideLoader();
+  if(!res.ok) return alert(res.message);
+  await loadExams();
+}
+
+async function setCurrentExam(examCode){
+  return toggleExamActive(examCode, true);
+}
+function pickExamForQuestions(examCode){
+  if($("questionExamFilter")) $("questionExamFilter").value = 'all';
+  if($("questionExamSearch")) $("questionExamSearch").value = examCode;
+  renderQuestionExamOptions(examCode);
+  $("selectedExamBadge").textContent = $("questionExamSelect").value || examCode;
+  $("permExamCode").value = examCode;
+  $("resultsExamCode").value = examCode;
+  if($("snapshotsExamCode")) $("snapshotsExamCode").value = examCode;
+  resetQuestionForm();
+  loadQuestionsForSelectedExam();
+}
+async function toggleArchiveExam(examCode, archived){
+  showLoader("Updating exam...");
+  const res=await apiRequest("archiveExam",{examCode, archived},"POST");
+  hideLoader(); if(!res.ok) return alert(res.message);
+  await loadExams();
+}
+async function deleteExamItem(examCode){
+  if(!confirm("Delete this exam? You can restore it later.")) return;
+  showLoader("Deleting exam...");
+  const res=await apiRequest("deleteExam",{examCode},"POST");
+  hideLoader();
+  alert(res.message);
+  if(res.ok) await loadExams();
+}
+async function restoreExamItem(examCode){
+  showLoader("Restoring exam...");
+  const res=await apiRequest("restoreExam",{examCode},"POST");
+  hideLoader();
+  alert(res.message);
+  if(res.ok) await loadExams();
+}
+function updateDeletedExamSelectionInfo(){
+  const el = $("deletedExamSelectionInfo");
+  if(!el) return;
+  el.textContent = selectedDeletedExamCodes.size ? `${selectedDeletedExamCodes.size} deleted exam(s) selected.` : "No deleted exam selected.";
+}
+async function hardDeleteExamItem(examCode){
+  if(!confirm("Delete this exam forever? This will permanently remove the exam, its questions, results, progress, and permission codes.")) return;
+  showLoader("Deleting exam forever...");
+  const res=await apiRequest("hardDeleteExam",{examCode},"POST");
+  hideLoader();
+  alert(res.message);
+  if(res.ok){
+    selectedDeletedExamCodes.delete(String(examCode));
+    await loadExams();
+  }
+}
+function toggleDeletedExamSelection(examCode, checked){
+  const key = String(examCode);
+  if(checked) selectedDeletedExamCodes.add(key); else selectedDeletedExamCodes.delete(key);
+  updateDeletedExamSelectionInfo();
+}
+function selectAllDeletedExams(){
+  const deletedExams = examsData.filter(e => e.isDeleted);
+  deletedExams.forEach(e => selectedDeletedExamCodes.add(String(e.examCode)));
+  renderExams();
+}
+async function hardDeleteSelectedDeletedExams(){
+  const examCodes = Array.from(selectedDeletedExamCodes);
+  if(!examCodes.length) return alert("Select at least one deleted exam first.");
+  if(!confirm(`Delete ${examCodes.length} deleted exam(s) forever? This cannot be undone.`)) return;
+  showLoader("Deleting selected exams forever...");
+  const res=await apiRequest("bulkHardDeleteExams",{examCodes},"POST");
+  hideLoader();
+  alert(res.message);
+  if(res.ok){
+    selectedDeletedExamCodes.clear();
+    await loadExams();
+  }
+}
+async function toggleExamLock(examCode, locked){
+  const notice = locked ? (prompt("Lock notice students should see for this exam:", "This exam is currently locked.") || "") : "";
+  showLoader(locked ? "Locking exam..." : "Unlocking exam...");
+  const res=await apiRequest("setExamLock",{examCode, locked, notice},"POST");
+  hideLoader(); if(!res.ok) return alert(res.message);
+  await loadExams();
+}
+async function duplicateExamPrompt(sourceExamCode){
+  const newCode = prompt("New unique exam code:"); if(!newCode) return;
+  const newTitle = prompt("New exam title:"); if(!newTitle) return;
+  showLoader("Duplicating exam...");
+  const res=await apiRequest("duplicateExam",{sourceExamCode, newExamCode:newCode.trim(), newTitle:newTitle.trim()},"POST");
+  hideLoader();
+  alert(res.message + (res.ok && res.data ? ` Copied questions: ${res.data.copiedQuestions}` : ""));
+  if(res.ok) await loadExams();
+}
+async function addCandidate(){
+  showLoader("Adding candidate...");
+  const res=await apiRequest("addCandidate",{fullName:$("candidateName").value.trim(), regId:$("candidateRegId").value.trim(), passportUrl:$("candidatePassportUrl")?.value.trim() || ""},"POST");
+  hideLoader(); setStatus("candidateStatus", res.message, res.ok);
+  if(res.ok){ $("candidateName").value=""; $("candidateRegId").value=""; await Promise.all([loadCandidates(), loadUsers()]); }
+}
+async function importCandidates(){
+  const file = $("candidateCsvFile").files[0];
+  if(!file) return setStatus("candidateStatus","Choose a candidate CSV first.");
+  const csvText = await fileToText(file);
+  const rows=parseCsv(csvText);
+  showLoader("Importing candidates...");
+  const res=await apiRequest("importCandidates",{rows, csvText, filename:file.name},"POST");
+  hideLoader();
+  setStatus("candidateStatus", res.ok ? `${res.message} Added: ${res.data.added}, Skipped: ${res.data.skipped}` : res.message, res.ok);
+  if(res.ok) await Promise.all([loadCandidates(), loadUsers()]);
+}
+async function loadCandidates(){
+  const res=await apiRequest("listCandidates",{},"GET");
+  if(!res.ok){ $("candidatesBox").innerHTML=`<div class="status error">${esc(res.message)}</div>`; return; }
+  candidatesData=res.data||[];
+  renderCandidates();
+}
+function getFilteredCandidates(){
+  const q=($("candidateSearch").value||"").trim().toLowerCase();
+  return candidatesData.filter(c=>!q || `${c.fullName} ${c.regId}`.toLowerCase().includes(q));
+}
+function renderCandidates(){
+  const list=getFilteredCandidates();
+  if(!list.length){ $("candidatesBox").innerHTML='<div class="muted">No candidates found.</div>'; return; }
+  let html=`<div class="table-wrap"><table><thead><tr><th>Full Name</th><th>Reg ID</th><th>Passport</th></tr></thead><tbody>`;
+  list.forEach(c=> html += `<tr><td>${esc(c.fullName)}</td><td>${esc(c.regId)}</td><td>${c.passportUrl ? `<a href="${esc(c.passportUrl)}" target="_blank" rel="noopener">Open</a>` : '<span class="muted">—</span>'}</td></tr>`);
+  $("candidatesBox").innerHTML=html+'</tbody></table></div>';
+}
+function exportCandidatesPdf(){
+  const list = getFilteredCandidates();
+  if(!list.length) return alert("No candidates to export.");
+  exportTablePdf("Student List", ["Full Name","Reg ID","Passport URL"], list.map(c => [c.fullName, c.regId, c.passportUrl || ""]), "student_list.pdf");
+}
+async function exportResultsByExam(){
+  const examCode = ($("resultsExamCode").value || '').trim();
+  const list = getVisibleResults();
+  if(!examCode && !list.length) return setStatus("resultsStatus","Load results for an exam first.");
+  showLoader("Preparing results CSV...");
+  try{
+    if(examCode){
+      const res = await apiRequest("exportResultsByExam", { examCode }, "POST");
+      if(res.ok && res.data && res.data.csv){
+        downloadText(res.data.filename || `results_${examCode.replace(/[^a-z0-9_-]+/gi,'_')}.csv`, res.data.csv);
+        setStatus("resultsStatus", `Results CSV exported for ${examCode}.`, true);
+        return;
+      }
+      if(res && !res.ok && !list.length){
+        setStatus("resultsStatus", res.message || "Could not prepare CSV export.");
+        return;
+      }
+    }
+    if(!list.length) return setStatus("resultsStatus","No loaded results found to export.");
+    const rows = [["timestamp","examCode","attemptNo","fullName","regId","username","score","total","percentage","passMark","passStatus","ranking","checkerVisibility","rowStatus","statusMessage"]];
+    list.forEach(r => rows.push([
+      r.timestamp || '', r.examCode || '', r.attemptNo || '', r.fullName || '', r.regId || '', r.username || '',
+      r.score || '', r.total || '', r.percentage || '', r.passMark || '', r.passStatus || '', r.ranking || '',
+      r.isDeleted ? 'Deleted' : (r.isPublished ? 'Visible' : 'Hidden'), r.isDeleted ? 'Deleted' : 'Active', r.statusMessage || ''
+    ]));
+    const csv = rows.map(row => row.map(value => {
+      const text = String(value == null ? '' : value);
+      return /[\",\n\r]/.test(text) ? `\"${text.replace(/\"/g,'\"\"')}\"` : text;
+    }).join(',')).join('\n');
+    const safeExam = (examCode || 'loaded_results').replace(/[^a-z0-9_-]+/gi,'_');
+    downloadText(`results_${safeExam}.csv`, csv);
+    setStatus("resultsStatus", `${list.length} loaded result(s) exported to CSV.`, true);
+  } finally {
+    hideLoader();
+  }
+}
+function buildResultsPdfRows(){
+  return getVisibleResults().map(r => [
+    r.timestamp || '', r.examCode || '', r.attemptNo || '', r.fullName || '', r.regId || '', r.username || '',
+    r.score || '', r.percentage || '', `${r.passMark || ''}%`, r.passStatus || '', r.ranking || '',
+    r.isDeleted ? 'Deleted' : (r.isPublished ? 'Visible' : 'Hidden')
+  ]);
+}
+function exportResultsPdfFallback(title, rows){
+  const win = window.open('', '_blank', 'width=1200,height=900');
+  if(!win) return false;
+  const head = ["Time","Exam","Attempt","Name","Reg ID","Username","Score","%","Pass Mark","Status","Rank","Checker"];
+  const body = rows.map(row => '<tr>' + row.map(cell => `<td>${esc(cell)}</td>`).join('') + '</tr>').join('');
+  win.document.write(`<!doctype html><html><head><title>${esc(title)}</title><style>
+    body{font-family:Arial,sans-serif;padding:24px;color:#111827}h1{margin:0 0 16px;font-size:22px}
+    table{width:100%;border-collapse:collapse;font-size:12px}th,td{border:1px solid #94a3b8;padding:8px;text-align:left}
+    th{background:#dbeafe}tbody tr:nth-child(even){background:#f8fafc}
+  </style></head><body><h1>${esc(title)}</h1><table><thead><tr>${head.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table></body></html>`);
+  win.document.close();
+  win.focus();
+  setTimeout(() => { try { win.print(); } catch(e) {} }, 300);
+  return true;
+}
+function exportResultsPdf(){
+  const examCode = ($("resultsExamCode").value || '').trim();
+  const rows = buildResultsPdfRows();
+  if(!rows.length) return setStatus("resultsStatus","No loaded results found to export.");
+  const title = `Results — ${examCode || 'Loaded Results'}`;
+  const filename = `results_${(examCode || 'loaded_results').replace(/[^a-z0-9_-]+/gi,'_')}.pdf`;
+  try{
+    exportTablePdf(title, ["Time","Exam","Attempt","Name","Reg ID","Username","Score","%","Pass Mark","Status","Rank","Checker"], rows, filename);
+    setStatus("resultsStatus", `${rows.length} loaded result(s) exported to PDF.`, true);
+  }catch(err){
+    const ok = exportResultsPdfFallback(title, rows);
+    setStatus("resultsStatus", ok ? "PDF export opened in a print window." : (err.message || "Could not export PDF."), ok);
+  }
+}
+async function generateAccounts(){
+  showLoader("Generating student accounts...");
+  const res=await apiRequest("generateStudentAccounts",{passwordLength:$("passwordLength").value},"POST");
+  hideLoader();
+  setStatus("accountsStatus", res.ok ? `${res.message} Created: ${res.data.createdCount}, Skipped: ${res.data.skippedCount}` : res.message, res.ok);
+  if(res.ok && res.data && res.data.csv){ lastGeneratedCsv=res.data.csv; lastGeneratedFilename=res.data.filename || 'student_accounts_passwords.csv'; downloadText(lastGeneratedFilename,lastGeneratedCsv); await loadUsers(); }
+}
+function downloadLastGenerated(){ if(!lastGeneratedCsv) return setStatus("accountsStatus","No generated CSV in this session."); downloadText(lastGeneratedFilename,lastGeneratedCsv); }
+async function loadUsers(){
+  const [adminsRes, studentsRes] = await Promise.all([apiRequest("listAdmins",{},"GET"), apiRequest("listStudents",{},"GET")]);
+  adminsData = adminsRes.ok ? (adminsRes.data || []) : [];
+  studentsData = studentsRes.ok ? (studentsRes.data || []) : [];
+  adminsData.sort((a,b)=> String(a.fullName||'').toLowerCase().localeCompare(String(b.fullName||'').toLowerCase()));
+  studentsData.sort((a,b)=> String(a.fullName||'').toLowerCase().localeCompare(String(b.fullName||'').toLowerCase()));
+  if(!adminsRes.ok && $("adminsBox")) $("adminsBox").innerHTML = `<div class="status error">${esc(adminsRes.message || 'Failed to load admin users.')}</div>`;
+  if(!studentsRes.ok && $("studentsBox")) $("studentsBox").innerHTML = `<div class="status error">${esc(studentsRes.message || 'Failed to load student users.')}</div>`;
+  renderUsers();
+}
+function renderUsers(){
+  $("adminsBox").innerHTML = renderUserTable(adminsData, 'admin');
+  $("studentsBox").innerHTML = renderUserTable(studentsData, 'student');
+}
+function userRoleBadge(role){
+  if(role === 'principal_admin') return '<span class="pill" style="background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe">Principal Admin</span>';
+  if(role === 'subadmin') return '<span class="pill" style="background:#f5f3ff;color:#6d28d9;border-color:#ddd6fe">Subadmin</span>';
+  return '<span class="pill">Student</span>';
+}
+function userStatusBadge(u){
+  if(u.isDeleted) return '<span class="pill" style="background:#fff1f2;color:#be123c;border-color:#fecdd3">Deleted</span>';
+  if(u.isActive) return '<span class="pill" style="background:#ecfdf5;color:#166534;border-color:#bbf7d0">Active</span>';
+  return '<span class="pill" style="background:#fff7ed;color:#b45309;border-color:#fed7aa">Inactive</span>';
+}
+function canManageTarget(u, type){
+  const role = getEffectiveAdminRole();
+  if(type === 'admin' && role !== 'principal_admin') return false;
+  if(role === 'principal_admin') return true;
+  if(role === 'subadmin') return type === 'student';
+  return false;
+}
+function renderUserTable(data, type){
+  if(!data.length) return '<div class="muted">No users.</div>';
+  const role = getEffectiveAdminRole();
+  let html=`<div class="table-wrap"><table><thead><tr><th>Name</th><th>Username</th>${type==='student' ? '<th>Reg ID</th>' : '<th>Role</th>'}<th>Status</th><th>Actions</th></tr></thead><tbody>`;
+  data.forEach(u=>{
+    const roleCell = type==='student' ? esc(u.regId || '—') : userRoleBadge(u.role);
+    const isPrincipal = u.role === 'principal_admin';
+    const manageable = type === 'student'
+      ? (role === 'principal_admin' || role === 'subadmin')
+      : (role === 'principal_admin' && !isPrincipal);
+    let actions = '';
+    if(isPrincipal && role === 'principal_admin'){
+      actions = '<span class="muted">Principal admin account</span>';
+    }else if(!manageable){
+      actions = '<span class="muted">View only</span>';
+    }else if(u.isDeleted){
+      actions = `<button class="small-btn success" type="button" onclick="restoreUserItem('${esc(u.username)}')">Restore</button>`;
+      if(!isPrincipal) actions += ` <button class="small-btn danger" type="button" onclick="hardDeleteUserItem('${esc(u.username)}')">Delete Forever</button>`;
+    }else{
+      actions = `<button class="small-btn warn" type="button" onclick="toggleUser('${esc(u.username)}', false)" ${u.isActive ? '' : 'disabled style="opacity:.55;cursor:not-allowed"'}>Deactivate</button>` +
+                ` <button class="small-btn success" type="button" onclick="toggleUser('${esc(u.username)}', true)" ${u.isActive ? 'disabled style="opacity:.55;cursor:not-allowed"' : ''}>Activate</button>` +
+                ` <button class="small-btn danger" type="button" onclick="deleteUser('${esc(u.username)}')">Delete</button>` +
+                ` <button class="small-btn" type="button" onclick="resetManagedUserPassword('${esc(u.username)}')">Reset Password</button>`;
+    }
+    html += `<tr><td>${esc(u.fullName)}</td><td>${esc(u.username)}</td><td>${roleCell}</td><td>${userStatusBadge(u)}</td><td><div class="actions">${actions}</div></td></tr>`;
+  });
+  return html + '</tbody></table></div>';
+}
+async function toggleUser(username, active){
+  showLoader("Updating user...");
+  const res=await apiRequest("setUserActive",{username, active},"POST");
+  hideLoader(); alert(res.message); if(res.ok) await loadUsers();
+}
+async function deleteUser(username){
+  if(!confirm("Delete this user? You can restore the account later.")) return;
+  showLoader("Deleting user...");
+  const res=await apiRequest("deleteUser",{username},"POST");
+  hideLoader(); alert(res.message); if(res.ok) await loadUsers();
+}
+async function restoreUserItem(username){
+  showLoader("Restoring user...");
+  const res=await apiRequest("restoreUser",{username},"POST");
+  hideLoader(); alert(res.message); if(res.ok) await loadUsers();
+}
+async function hardDeleteUserItem(username){
+  if(!confirm("Delete this user forever? This cannot be undone.")) return;
+  showLoader("Deleting user forever...");
+  const res=await apiRequest("hardDeleteUser",{username},"POST");
+  hideLoader(); alert(res.message); if(res.ok) await loadUsers();
+}
+function resetQuestionForm(){
+  $("questionEditId").value=''; $("questionText").value=''; $("imageUrl").value=''; $("optionA").value=''; $("optionB").value=''; $("optionC").value=''; $("optionD").value=''; $("correctAnswer").value='';
+  $("addQuestionBtn").classList.remove('hidden'); $("updateQuestionBtn").classList.add('hidden'); $("cancelQuestionEditBtn").classList.add('hidden');
+}
+async function addQuestion(){
+  const examCode=$("questionExamSelect").value.trim();
+  if(!examCode) return setStatus("questionStatus","Select an exam first.");
+  showLoader("Adding question...");
+  const res=await apiRequest("addQuestion",{examCode, question:$("questionText").value.trim(), imageUrl:$("imageUrl").value.trim(), optionA:$("optionA").value.trim(), optionB:$("optionB").value.trim(), optionC:$("optionC").value.trim(), optionD:$("optionD").value.trim(), answer:$("correctAnswer").value},"POST");
+  hideLoader(); setStatus("questionStatus", res.message, res.ok);
+  if(res.ok){ resetQuestionForm(); await loadQuestionsForSelectedExam(); }
+}
+function startQuestionEdit(questionId){
+  const item=questionsData.find(q=>String(q.id)===String(questionId));
+  if(!item) return;
+  $("questionEditId").value=item.id; $("questionText").value=item.question||''; $("imageUrl").value=item.imageUrl||''; $("optionA").value=item.optionA||''; $("optionB").value=item.optionB||''; $("optionC").value=item.optionC||''; $("optionD").value=item.optionD||''; $("correctAnswer").value=item.answer||'';
+  $("addQuestionBtn").classList.add('hidden'); $("updateQuestionBtn").classList.remove('hidden'); $("cancelQuestionEditBtn").classList.remove('hidden');
+  window.scrollTo({top:$("questionText").getBoundingClientRect().top + window.scrollY - 110, behavior:'smooth'});
+}
+async function updateQuestion(){
+  const examCode=$("questionExamSelect").value.trim();
+  if(!examCode) return setStatus("questionStatus","Select an exam first.");
+  if(!$("questionEditId").value.trim()) return setStatus("questionStatus","Select a question to edit first.");
+  showLoader("Saving question changes...");
+  const res=await apiRequest("updateQuestionByExam",{examCode, questionId:$("questionEditId").value.trim(), question:$("questionText").value.trim(), imageUrl:$("imageUrl").value.trim(), optionA:$("optionA").value.trim(), optionB:$("optionB").value.trim(), optionC:$("optionC").value.trim(), optionD:$("optionD").value.trim(), answer:$("correctAnswer").value},"POST");
+  hideLoader(); setStatus("questionStatus", res.message, res.ok);
+  if(res.ok){ resetQuestionForm(); await loadQuestionsForSelectedExam(); }
+}
+async function deleteQuestionItem(questionId){
+  const examCode=$("questionExamSelect").value.trim();
+  if(!examCode) return setStatus("questionStatus","Select an exam first.");
+  if(!confirm("Delete this question from the selected exam?")) return;
+  showLoader("Deleting question...");
+  const res=await apiRequest("deleteQuestionByExam",{examCode, questionId},"POST");
+  hideLoader(); setStatus("questionStatus", res.message, res.ok);
+  if(res.ok){ selectedQuestionIds.delete(String(questionId)); if($("questionEditId").value===String(questionId)) resetQuestionForm(); await loadQuestionsForSelectedExam(); }
+}
+async function restoreQuestionItem(questionId){
+  const examCode=$("questionExamSelect").value.trim();
+  if(!examCode) return setStatus("questionStatus","Select an exam first.");
+  showLoader("Restoring question...");
+  const res=await apiRequest("restoreQuestionByExam",{examCode, questionId},"POST");
+  hideLoader(); setStatus("questionStatus", res.message, res.ok);
+  if(res.ok){ await loadQuestionsForSelectedExam(); }
+}
+async function importQuestions(){
+  const examCode=$("questionExamSelect").value.trim(), file=$("questionCsvFile").files[0];
+  if(!examCode) return setStatus("questionStatus","Select an exam first.");
+  if(!file) return setStatus("questionStatus","Choose a questions CSV first.");
+  const csvText = await fileToText(file);
+  const rows=parseCsv(csvText);
+  showLoader("Importing questions...");
+  const res=await apiRequest("importQuestions",{examCode, rows, csvText, filename:file.name},"POST");
+  hideLoader(); setStatus("questionStatus", res.ok ? `${res.message} Added: ${res.data.added}, Skipped: ${res.data.skipped}` : res.message, res.ok);
+  if(res.ok) await loadQuestionsForSelectedExam();
+}
+async function clearQuestionsByExam(){
+  const examCode=$("questionExamSelect").value.trim();
+  if(!examCode) return setStatus("questionStatus","Select an exam first.");
+  if(!confirm("Delete all active questions for this exam? You can restore them later.")) return;
+  showLoader("Deleting questions...");
+  const res=await apiRequest("clearQuestionsByExam",{examCode},"POST");
+  hideLoader(); setStatus("questionStatus", res.message, res.ok);
+  if(res.ok){ selectedQuestionIds.clear(); await loadQuestionsForSelectedExam(); }
+}
+function getVisibleQuestions(){
+  const q=($("questionSearch").value||"").trim().toLowerCase();
+  const showDeleted = $("questionShowDeleted").checked;
+  return questionsData.filter(item=>{
+    if(item.isDeleted && !showDeleted) return false;
+    return !q || `${item.question} ${item.optionA} ${item.optionB} ${item.optionC} ${item.optionD} ${item.answer}`.toLowerCase().includes(q);
+  });
+}
+function toggleQuestionSelection(questionId, checked){
+  const key = String(questionId);
+  if(checked) selectedQuestionIds.add(key); else selectedQuestionIds.delete(key);
+  updateQuestionsSelectionInfo();
+}
+function updateQuestionsSelectionInfo(){
+  $("questionsSelectionInfo").textContent = selectedQuestionIds.size ? `${selectedQuestionIds.size} question(s) selected.` : "No question selected.";
+}
+function selectAllVisibleQuestions(){
+  const list = getVisibleQuestions();
+  if(!list.length) return;
+  list.forEach(item => selectedQuestionIds.add(String(item.id)));
+  renderQuestions();
+}
+async function bulkDeleteSelectedQuestions(){
+  const examCode=$("questionExamSelect").value.trim();
+  if(!examCode) return setStatus("questionStatus","Select an exam first.");
+  const ids = Array.from(selectedQuestionIds);
+  if(!ids.length) return setStatus("questionStatus","Select at least one question.");
+  if(!confirm(`Delete ${ids.length} selected question(s)?`)) return;
+  showLoader("Deleting selected questions...");
+  const res=await apiRequest("bulkDeleteQuestionsByExam",{examCode, questionIds: ids},"POST");
+  hideLoader(); setStatus("questionStatus", res.message, res.ok);
+  if(res.ok){ selectedQuestionIds.clear(); await loadQuestionsForSelectedExam(); }
+}
+async function bulkRestoreSelectedQuestions(){
+  const examCode=$("questionExamSelect").value.trim();
+  if(!examCode) return setStatus("questionStatus","Select an exam first.");
+  const ids = Array.from(selectedQuestionIds);
+  if(!ids.length) return setStatus("questionStatus","Select at least one question.");
+  showLoader("Restoring selected questions...");
+  const res=await apiRequest("bulkRestoreQuestionsByExam",{examCode, questionIds: ids},"POST");
+  hideLoader(); setStatus("questionStatus", res.message, res.ok);
+  if(res.ok){ selectedQuestionIds.clear(); await loadQuestionsForSelectedExam(); }
+}
+async function bulkHardDeleteSelectedQuestions(){
+  const examCode=$("questionExamSelect").value.trim();
+  if(!examCode) return setStatus("questionStatus","Select an exam first.");
+  const ids = Array.from(selectedQuestionIds);
+  if(!ids.length) return setStatus("questionStatus","Select at least one question.");
+  if(!confirm(`Delete ${ids.length} selected deleted question(s) forever? This cannot be undone.`)) return;
+  showLoader("Deleting selected questions forever...");
+  const res=await apiRequest("bulkHardDeleteQuestionsByExam",{examCode, questionIds: ids},"POST");
+  hideLoader(); setStatus("questionStatus", res.message, res.ok);
+  if(res.ok){ selectedQuestionIds.clear(); await loadQuestionsForSelectedExam(); }
+}
+
+async function hardDeleteQuestionItem(questionId){
+  const examCode=$("questionExamSelect").value.trim();
+  if(!examCode) return setStatus("questionStatus","Select an exam first.");
+  if(!confirm("Delete this question forever? This cannot be undone.")) return;
+  showLoader("Deleting question forever...");
+  const res=await apiRequest("hardDeleteQuestionByExam",{examCode, questionId},"POST");
+  hideLoader(); setStatus("questionStatus", res.message, res.ok);
+  if(res.ok){ selectedQuestionIds.delete(String(questionId)); if($("questionEditId").value===String(questionId)) resetQuestionForm(); await loadQuestionsForSelectedExam(); }
+}
+async function loadQuestionsForSelectedExam(){
+  const examCode=$("questionExamSelect").value.trim();
+  $("selectedExamBadge").textContent = examCode || 'None';
+  selectedQuestionIds.clear();
+  if(!examCode){ questionsData=[]; renderQuestions(); return; }
+  showLoader("Loading questions...");
+  const res=await apiRequest("listQuestionsByExam",{examCode, includeDeleted:true},"POST");
+  hideLoader();
+  if(!res.ok){ $("questionsBox").innerHTML=`<div class="status error">${esc(res.message)}</div>`; return; }
+  questionsData=res.data||[];
+  renderQuestions();
+}
+function renderQuestions(){
+  const list=getVisibleQuestions();
+  updateQuestionsSelectionInfo();
+  if(!list.length){ $("questionsBox").innerHTML='<div class="muted" style="margin-top:12px">No questions found for this exam.</div>'; return; }
+  $("questionsBox").innerHTML = list.map((item,i)=>`<div class="card" style="margin-top:12px;padding:16px;${item.isDeleted ? 'opacity:.72;border-style:dashed;' : ''}"><div class="actions" style="justify-content:space-between;align-items:center"><div class="actions" style="align-items:center"><label class="pill" style="cursor:pointer"><input type="checkbox" ${selectedQuestionIds.has(String(item.id)) ? 'checked' : ''} onchange="toggleQuestionSelection('${esc(String(item.id))}', this.checked)" style="margin:0 6px 0 0">Select</label><div class="pill">Question ${i+1}</div>${item.isDeleted ? '<div class="pill" style="background:#fff7ed;color:#b45309;border-color:#fed7aa">Deleted</div>' : '<div class="pill" style="background:#ecfdf5;color:#166534;border-color:#bbf7d0">Active</div>'}</div><div class="actions"><button class="small-btn warn" type="button" onclick="startQuestionEdit('${esc(String(item.id))}')">Edit</button>${item.isDeleted ? `<button class="small-btn success" type="button" onclick="restoreQuestionItem('${esc(String(item.id))}')">Restore</button><button class="small-btn danger" type="button" onclick="hardDeleteQuestionItem('${esc(String(item.id))}')">Delete Forever</button>` : `<button class="small-btn danger" type="button" onclick="deleteQuestionItem('${esc(String(item.id))}')">Delete</button>`}</div></div><h3 style="margin:10px 0 8px;font-size:1rem">${esc(item.question)}</h3>${item.imageUrl ? `<img src="${esc(item.imageUrl)}" alt="Question image" style="max-width:100%;max-height:240px;border:1px solid var(--line);border-radius:12px;margin-bottom:12px">` : ''}<div class="muted">A. ${esc(item.optionA)}<br>B. ${esc(item.optionB)}<br>C. ${esc(item.optionC)}<br>D. ${esc(item.optionD)}<br><b>Answer:</b> ${esc(item.answer)}</div></div>`).join('');
+}
+async function createPermissionCode(){
+  showLoader("Creating permission code...");
+  const res=await apiRequest("createPermissionCode",{examCode:$("permExamCode").value.trim(), regId:$("permRegId").value.trim(), username:$("permUsername").value.trim(), reason:$("permReason").value.trim()},"POST");
+  hideLoader();
+  setStatus("permissionStatus", res.ok ? `${res.message} Code: ${res.data.permissionCode}` : res.message, res.ok);
+  if(res.ok){ $("permReason").value=''; await loadPermissionCodes(); }
+}
+async function loadPermissionCodes(){
+  const res=await apiRequest("listPermissionCodes",{},"GET");
+  if(!res.ok){ $("permissionCodesBox").innerHTML=`<div class="status error">${esc(res.message)}</div>`; return; }
+  const list=res.data||[];
+  if(!list.length){ $("permissionCodesBox").innerHTML='<div class="muted">No permission codes yet.</div>'; return; }
+  let html=`<div class="table-wrap"><table><thead><tr><th>Code</th><th>Exam</th><th>Reg ID</th><th>Username</th><th>Status</th><th>Reason</th><th>Action</th></tr></thead><tbody>`;
+  list.forEach(p=> html += `<tr><td><span class="code">${esc(p.permissionCode)}</span></td><td>${esc(p.examCode)}</td><td>${esc(p.regId)}</td><td>${esc(p.username)}</td><td>${esc(p.status)}</td><td>${esc(p.reason)}</td><td><button class="small-btn danger" type="button" onclick="deletePermissionCode('${esc(p.permissionCode)}')">Delete</button></td></tr>`);
+  $("permissionCodesBox").innerHTML = html + '</tbody></table></div>';
+}
+
+async function deletePermissionCode(permissionCode){
+  if(!confirm(`Delete permission code ${permissionCode}?`)) return;
+  showLoader("Deleting permission code...");
+  const res=await apiRequest("deletePermissionCode",{permissionCode},"POST");
+  hideLoader();
+  setStatus("permissionStatus", res.message, res.ok);
+  if(res.ok) await loadPermissionCodes();
+}
+
+async function clearPermissionCodes(){
+  if(!confirm("Delete all permission codes? This cannot be undone.")) return;
+  showLoader("Deleting all permission codes...");
+  const res=await apiRequest("clearPermissionCodes",{},"POST");
+  hideLoader();
+  setStatus("permissionStatus", res.message, res.ok);
+  if(res.ok) await loadPermissionCodes();
+}
+
+async function loadResultsByExam(){
+  const examCode=$("resultsExamCode").value.trim();
+  const includeDeleted = $("resultsShowDeleted") ? $("resultsShowDeleted").checked : false;
+  selectedResultIds.clear();
+  showLoader("Loading results...");
+  const res=await apiRequest("listResultsByExam",{examCode, includeDeleted},"POST");
+  hideLoader();
+  setStatus("resultsStatus", res.message, res.ok);
+  if(!res.ok){ $("resultsBox").innerHTML=''; $("resultsSelectionInfo").textContent=''; resultsData=[]; return; }
+  resultsData=res.data||[];
+  renderResultsTable();
+}
+function getVisibleResults(){ return resultsData.slice(); }
+function updateResultsSelectionInfo(){
+  if(!$("resultsSelectionInfo")) return;
+  $("resultsSelectionInfo").textContent = `${selectedResultIds.size} selected out of ${getVisibleResults().length} loaded result(s).`;
+}
+function toggleResultSelection(resultId, checked){
+  const id = String(resultId);
+  if(checked) selectedResultIds.add(id); else selectedResultIds.delete(id);
+  updateResultsSelectionInfo();
+}
+function selectAllVisibleResults(){
+  const allVisible = getVisibleResults();
+  const shouldSelect = allVisible.some(item => !selectedResultIds.has(String(item.id)));
+  allVisible.forEach(item => {
+    const id = String(item.id);
+    if(shouldSelect) selectedResultIds.add(id); else selectedResultIds.delete(id);
+  });
+  renderResultsTable();
+}
+function renderResultsTable(){
+  updateResultsSelectionInfo();
+  if(!resultsData.length){ $("resultsBox").innerHTML='<div class="muted">No results found for this filter yet.</div>'; return; }
+  let html=`<div class="table-wrap"><table><thead><tr><th>Select</th><th>Time</th><th>Exam</th><th>Attempt</th><th>Name</th><th>Reg ID</th><th>Username</th><th>Score</th><th>%</th><th>Pass Mark</th><th>Status</th><th>Rank</th><th>Checker</th><th>Row Status</th><th>Action</th></tr></thead><tbody>`;
+  resultsData.forEach(r=>{
+    const checkerStatus = r.isDeleted ? 'Deleted' : (r.isPublished ? 'Visible' : 'Hidden');
+    const rowStatus = r.isDeleted ? '<span class="pill" style="background:#fff1f2;color:#be123c;border-color:#fecdd3">Deleted</span>' : '<span class="pill" style="background:#ecfdf5;color:#166534;border-color:#bbf7d0">Active</span>';
+    const checkerPill = r.isDeleted
+      ? '<span class="pill" style="background:#fff1f2;color:#be123c;border-color:#fecdd3">Deleted</span>'
+      : (r.isPublished ? '<span class="pill" style="background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe">Visible</span>' : '<span class="pill" style="background:#fff7ed;color:#b45309;border-color:#fed7aa">Hidden</span>');
+    let actions = '';
+    if(r.isDeleted){
+      actions = `<button class="small-btn success" type="button" onclick="restoreResultItem('${esc(r.id)}')">Restore</button> <button class="small-btn danger" type="button" onclick="hardDeleteResultItem('${esc(r.id)}')">Delete Forever</button>`;
+    }else{
+      actions = `<button class="small-btn ${r.isPublished ? 'warn' : 'success'}" type="button" onclick="setResultPublished('${esc(r.id)}', ${r.isPublished ? 'false' : 'true'})">${r.isPublished ? 'Hide' : 'Show'}</button> <button class="small-btn danger" type="button" onclick="deleteResultItem('${esc(r.id)}')">Delete</button>`;
+    }
+    html += `<tr>
+      <td><input type="checkbox" ${selectedResultIds.has(String(r.id)) ? 'checked' : ''} onchange="toggleResultSelection('${esc(r.id)}', this.checked)"></td>
+      <td>${esc(r.timestamp)}</td><td>${esc(r.examCode)}</td><td>${esc(r.attemptNo)}</td><td>${esc(r.fullName)}</td><td>${esc(r.regId)}</td><td>${esc(r.username || '')}</td><td>${esc(r.score)}</td><td>${esc(r.percentage)}</td><td>${esc(r.passMark)}%</td><td>${esc(r.passStatus)}</td><td>${esc(r.ranking)}</td><td>${checkerPill}</td><td>${rowStatus}</td><td><div class="actions">${actions}</div></td>
+    </tr>`;
+  });
+  $("resultsBox").innerHTML = html + '</tbody></table></div>';
+}
+async function runBulkResultAction(action, extra = {}, confirmText = ''){
+  const resultIds = Array.from(selectedResultIds);
+  if(!resultIds.length) return setStatus("resultsStatus","Select at least one result first.");
+  if(confirmText && !confirm(confirmText)) return;
+  showLoader("Updating results...");
+  const res = await apiRequest(action, Object.assign({ resultIds }, extra), "POST");
+  hideLoader();
+  setStatus("resultsStatus", res.message, res.ok);
+  if(res.ok) await loadResultsByExam();
+}
+async function setResultPublished(resultId, published){
+  showLoader("Updating result visibility...");
+  const res = await apiRequest("setResultPublished",{ resultId, published }, "POST");
+  hideLoader();
+  setStatus("resultsStatus", res.message, res.ok);
+  if(res.ok) await loadResultsByExam();
+}
+async function deleteResultItem(resultId){
+  if(!confirm("Delete this result? You can restore it later.")) return;
+  showLoader("Deleting result...");
+  const res = await apiRequest("deleteResult",{ resultId }, "POST");
+  hideLoader();
+  setStatus("resultsStatus", res.message, res.ok);
+  if(res.ok) await loadResultsByExam();
+}
+async function restoreResultItem(resultId){
+  showLoader("Restoring result...");
+  const res = await apiRequest("restoreResult",{ resultId }, "POST");
+  hideLoader();
+  setStatus("resultsStatus", res.message, res.ok);
+  if(res.ok) await loadResultsByExam();
+}
+async function hardDeleteResultItem(resultId){
+  if(!confirm("Delete this result forever? This cannot be undone.")) return;
+  showLoader("Deleting result forever...");
+  const res = await apiRequest("hardDeleteResult",{ resultId }, "POST");
+  hideLoader();
+  setStatus("resultsStatus", res.message, res.ok);
+  if(res.ok) await loadResultsByExam();
+}
+async function loadSnapshots(){
+  const examCode = $("snapshotsExamCode").value.trim();
+  const regId = $("snapshotsRegId").value.trim();
+  const includeDeleted = $("snapshotsShowDeleted") ? $("snapshotsShowDeleted").checked : false;
+  selectedSnapshotIds.clear();
+  showLoader("Loading snapshots...");
+  const res = await apiRequest("listSnapshotsByExam", { examCode, regId, includeDeleted, limit: 300 }, "GET");
+  hideLoader();
+  setStatus("snapshotsStatus", res.message, res.ok);
+  snapshotsData = res.ok ? (res.data || []) : [];
+  renderSnapshots();
+}
+async function loadAudio(){
+  const examCode = $("snapshotsExamCode").value.trim();
+  const regId = $("snapshotsRegId").value.trim();
+  const includeDeleted = $("snapshotsShowDeleted") ? $("snapshotsShowDeleted").checked : false;
+  showLoader("Loading audio...");
+  const res = await apiRequest("listAudioByExam", { examCode, regId, includeDeleted, limit: 300 }, "GET");
+  hideLoader();
+  setStatus("audioStatus", res.message, res.ok);
+  audioData = res.ok ? (res.data || []) : [];
+  renderAudio();
+}
+
+function evidenceKindLabel(kind){
+  return ({ snapshot:'Snapshots', audio:'Audio', video:'Video', screen:'Screen Recordings' }[kind]) || 'Evidence';
+}
+function evidenceStatusId(kind){
+  return ({ snapshot:'snapshotsStatus', audio:'audioStatus', video:'videoStatus', screen:'screenStatus' }[kind]) || 'snapshotsStatus';
+}
+function evidenceBoxId(kind){
+  return ({ snapshot:'snapshotsBox', audio:'audioBox', video:'videosBox', screen:'screenBox' }[kind]) || 'snapshotsBox';
+}
+function renderDriveFolderView(kind, payload){
+  const box = $(evidenceBoxId(kind));
+  if(!box) return;
+  const data = payload || {};
+  const folder = data.folder || {};
+  const children = Array.isArray(data.children) ? data.children : [];
+  const items = Array.isArray(data.items) ? data.items : [];
+  let html = `<div class="table-wrap"><table><tbody>`;
+  html += `<tr><th style="width:180px">Folder</th><td><strong>${esc(folder.name || evidenceKindLabel(kind))}</strong></td></tr>`;
+  html += `<tr><th>Scope</th><td>Exam: <span class="code">${esc(folder.examCode || 'ALL')}</span> &nbsp; Reg ID: <span class="code">${esc(folder.regId || 'ALL')}</span></td></tr>`;
+  html += `<tr><th>Open</th><td>${folder.folderUrl ? `<a class="btn ghost" href="${esc(folder.folderUrl)}" target="_blank" rel="noopener">Open Folder in Drive</a>` : '<span class="muted">Folder unavailable</span>'}</td></tr>`;
+  html += `</tbody></table></div>`;
+  html += `<div class="muted" style="margin:10px 0 8px">Direct contents from Drive${children.length ? '' : ' (none found yet)'}.</div>`;
+  if(children.length){
+    html += `<div class="table-wrap"><table><thead><tr><th>Type</th><th>Name</th><th>Open</th></tr></thead><tbody>`;
+    children.forEach(child=>{
+      html += `<tr><td>${esc(child.type || '')}</td><td>${esc(child.name || '')}</td><td><a href="${esc(child.url || '#')}" target="_blank" rel="noopener">Open in Drive</a></td></tr>`;
+    });
+    html += `</tbody></table></div>`;
+  }
+  html += `<div class="muted" style="margin:14px 0 8px">Tracked uploads for this filter${items.length ? '' : ' (none found yet)'}.</div>`;
+  if(items.length){
+    html += `<div class="table-wrap"><table><thead><tr><th>Time</th><th>Exam</th><th>Reg ID</th><th>Name</th><th>Open</th><th>Status</th></tr></thead><tbody>`;
+    items.forEach(item=>{
+      const state = item.isDeleted ? 'Deleted' : 'Active';
+      html += `<tr><td>${esc(item.createdAt || '')}</td><td>${esc(item.examCode || '')}</td><td>${esc(item.regId || '')}</td><td>${esc(item.fullName || item.originalName || '')}</td><td><a href="${esc(item.driveUrl || '#')}" target="_blank" rel="noopener">Open in Drive</a></td><td>${esc(state)}</td></tr>`;
+    });
+    html += `</tbody></table></div>`;
+  }
+  box.innerHTML = html;
+}
+async function loadEvidenceFolder(kind, openInNewTab=true){
+  const examCode = $('snapshotsExamCode').value.trim();
+  const regId = $('snapshotsRegId').value.trim();
+  const includeDeleted = $('snapshotsShowDeleted') ? $('snapshotsShowDeleted').checked : false;
+  showLoader(`Loading ${evidenceKindLabel(kind).toLowerCase()} folder...`);
+  const res = await apiRequest('getProctoringFolderView', { kind, examCode, regId, includeDeleted, limit: 100 }, 'POST');
+  hideLoader();
+  setStatus(evidenceStatusId(kind), res.message, res.ok);
+  if(res.ok){
+    renderDriveFolderView(kind, res.data || {});
+    const folderUrl = res.data && res.data.folder ? res.data.folder.folderUrl : '';
+    if(openInNewTab && folderUrl) window.open(folderUrl, '_blank', 'noopener');
+  } else {
+    const box = $(evidenceBoxId(kind));
+    if(box) box.innerHTML = '';
+  }
+}
+
+function updateSnapshotsSelectionInfo(){
+  if(!$("snapshotsSelectionInfo")) return;
+  $("snapshotsSelectionInfo").textContent = `${selectedSnapshotIds.size} selected out of ${snapshotsData.length} loaded snapshot(s).`;
+}
+function toggleSnapshotSelection(fileId, checked){
+  const id = String(fileId);
+  if(checked) selectedSnapshotIds.add(id); else selectedSnapshotIds.delete(id);
+  updateSnapshotsSelectionInfo();
+}
+function selectAllVisibleSnapshots(){
+  const shouldSelect = snapshotsData.some(item => !selectedSnapshotIds.has(String(item.id)));
+  snapshotsData.forEach(item => {
+    const id = String(item.id);
+    if(shouldSelect) selectedSnapshotIds.add(id); else selectedSnapshotIds.delete(id);
+  });
+  renderSnapshots();
+}
+function renderSnapshots(){
+  updateSnapshotsSelectionInfo();
+  if(!snapshotsData.length){ $("snapshotsBox").innerHTML = '<div class="muted">No snapshots found for this filter yet.</div>'; return; }
+  let html = `<div class="snapshot-grid">`;
+  snapshotsData.forEach(item => {
+    const statePill = item.isDeleted
+      ? '<span class="pill" style="background:#fff1f2;color:#be123c;border-color:#fecdd3">Deleted</span>'
+      : '<span class="pill" style="background:#ecfdf5;color:#166534;border-color:#bbf7d0">Active</span>';
+    const actions = item.isDeleted
+      ? `<button class="small-btn success" type="button" onclick="restoreSnapshotItem('${esc(item.id)}')">Restore</button> <button class="small-btn danger" type="button" onclick="hardDeleteSnapshotItem('${esc(item.id)}')">Delete Forever</button>`
+      : `<button class="small-btn danger" type="button" onclick="deleteSnapshotItem('${esc(item.id)}')">Delete</button>`;
+    html += `<div class="snapshot-card" style="${item.isDeleted ? 'opacity:.72;border-style:dashed;' : ''}">
+      <div class="actions" style="justify-content:space-between;align-items:center;margin-bottom:8px">
+        <label class="pill" style="cursor:pointer"><input type="checkbox" ${selectedSnapshotIds.has(String(item.id)) ? 'checked' : ''} onchange="toggleSnapshotSelection('${esc(item.id)}', this.checked)" style="margin:0 6px 0 0">Select</label>
+        ${statePill}
+      </div>
+      <img src="${esc(item.viewUrl || item.thumbUrl || '')}" alt="Snapshot for ${esc(item.regId || '')}" loading="lazy">
+      <div class="snapshot-meta">
+        <div><strong>${esc(item.fullName || item.regId || 'Student')}</strong></div>
+        <div>Exam: <span class="code">${esc(item.examCode)}</span></div>
+        <div>Reg ID: <span class="code">${esc(item.regId || '—')}</span></div>
+        <div>Captured: ${esc(item.createdAt || '')}</div>
+      </div>
+      <div class="actions" style="margin-top:10px">
+        <a class="btn ghost" href="${esc(item.driveUrl || '#')}" target="_blank" rel="noopener">Open in Drive</a>
+        ${actions}
+      </div>
+    </div>`;
+  });
+  $("snapshotsBox").innerHTML = html + `</div>`;
+}
+function renderAudio(){
+  if(!audioData.length){ $("audioBox").innerHTML = '<div class="muted">No audio clips found for this filter yet.</div>'; return; }
+  let html = `<div class="table-wrap"><table><thead><tr><th>Time</th><th>Exam</th><th>Reg ID</th><th>Name</th><th>Clip</th><th>Status</th></tr></thead><tbody>`;
+  audioData.forEach(item=>{
+    const state = item.isDeleted ? 'Deleted' : 'Active';
+    html += `<tr><td>${esc(item.createdAt || '')}</td><td>${esc(item.examCode || '')}</td><td>${esc(item.regId || '')}</td><td>${esc(item.fullName || '')}</td><td><a href="${esc(item.driveUrl || '#')}" target="_blank" rel="noopener">Open Audio</a></td><td>${esc(state)}</td></tr>`;
+  });
+  $("audioBox").innerHTML = html + '</tbody></table></div>';
+}
+
+
+async function loadScreens(){
+  await loadEvidenceFolder('screen');
+}
+
+async function loadSnapshots(){
+  await loadEvidenceFolder('snapshot');
+}
+
+async function loadAudio(){
+  await loadEvidenceFolder('audio');
+}
+
+async function loadVideos(){
+  await loadEvidenceFolder('video');
+}
+
+function renderVideos(){
+  if(!$('videosBox')) return;
+  if(!videosData.length){ $('videosBox').innerHTML = '<div class="muted">No video clips found for this filter yet.</div>'; return; }
+  let html = `<div class="table-wrap"><table><thead><tr><th>Time</th><th>Exam</th><th>Reg ID</th><th>Name</th><th>Type</th><th>Preview</th><th>Open</th><th>Status</th></tr></thead><tbody>`;
+  videosData.forEach(item=>{
+    const state = item.isDeleted ? 'Deleted' : 'Active';
+    const preview = item.viewUrl || item.driveUrl || '';
+    const typeLabel = item.kind === 'screen' ? 'Screen' : 'Camera';
+    html += `<tr><td>${esc(item.createdAt || '')}</td><td>${esc(item.examCode || '')}</td><td>${esc(item.regId || '')}</td><td>${esc(item.fullName || '')}</td><td>${esc(typeLabel)}</td><td>${preview ? `<video controls preload="metadata" style="width:210px;max-width:100%;border-radius:10px;border:1px solid var(--line);background:#000"><source src="${esc(preview)}"></video>` : '<span class="muted">No preview</span>'}</td><td><a href="${esc(item.driveUrl || '#')}" target="_blank" rel="noopener">Open Video</a></td><td>${esc(state)}</td></tr>`;
+  });
+  $('videosBox').innerHTML = html + '</tbody></table></div>';
+}
+async function runBulkSnapshotAction(action, confirmText=''){
+  const fileIds = Array.from(selectedSnapshotIds);
+  if(!fileIds.length) return setStatus("snapshotsStatus","Select at least one snapshot first.");
+  if(confirmText && !confirm(confirmText)) return;
+  showLoader("Updating snapshots...");
+  const res = await apiRequest(action, { fileIds }, "POST");
+  hideLoader();
+  setStatus("snapshotsStatus", res.message, res.ok);
+  if(res.ok) await loadSnapshots();
+}
+async function deleteSnapshotItem(fileId){
+  if(!confirm("Delete this snapshot? You can restore it later.")) return;
+  showLoader("Deleting snapshot...");
+  const res = await apiRequest("deleteSnapshot", { fileId }, "POST");
+  hideLoader();
+  setStatus("snapshotsStatus", res.message, res.ok);
+  if(res.ok) await loadSnapshots();
+}
+async function restoreSnapshotItem(fileId){
+  showLoader("Restoring snapshot...");
+  const res = await apiRequest("restoreSnapshot", { fileId }, "POST");
+  hideLoader();
+  setStatus("snapshotsStatus", res.message, res.ok);
+  if(res.ok) await loadSnapshots();
+}
+async function hardDeleteSnapshotItem(fileId){
+  if(!confirm("Delete this snapshot forever? This cannot be undone.")) return;
+  showLoader("Deleting snapshot forever...");
+  const res = await apiRequest("hardDeleteSnapshot", { fileId }, "POST");
+  hideLoader();
+  setStatus("snapshotsStatus", res.message, res.ok);
+  if(res.ok) await loadSnapshots();
+}
+
+function generateResultCheckerLink(showStatus=true){
+  const examCode = $("resultLinkExamSelect").value.trim();
+  if(!examCode){
+    $("resultCheckerLink").value = "";
+    if(showStatus) setStatus("resultLinkStatus","Select an exam first.");
+    return;
+  }
+  const url = new URL('result_checker.html', location.href);
+  url.searchParams.set('exam', examCode);
+  $("resultCheckerLink").value = url.toString();
+  if(showStatus) setStatus("resultLinkStatus","Result checker link generated.", true);
+}
+async function copyResultCheckerLink(){
+  if(!$("resultCheckerLink").value.trim()) generateResultCheckerLink(false);
+  if(!$("resultCheckerLink").value.trim()) return setStatus("resultLinkStatus","Generate the link first.");
+  try{
+    await navigator.clipboard.writeText($("resultCheckerLink").value.trim());
+    setStatus("resultLinkStatus","Link copied.", true);
+  }catch(err){
+    $("resultCheckerLink").select();
+    document.execCommand("copy");
+    setStatus("resultLinkStatus","Link copied.", true);
+  }
+}
+
+$("loginBtn").addEventListener("click", loginAdmin);
+$("signupBtn").addEventListener("click", signupAdmin);
+$("forgotBtn").addEventListener("click", forgotAdminPassword);
+$("changePasswordBtn").addEventListener("click", changeOwnAdminPassword);
+$("logoutBtn").addEventListener("click", logoutCurrent);
+$("saveSettingsBtn").addEventListener("click", saveSettings);
+if($("saveSubadminTokenBtn")) $("saveSubadminTokenBtn").addEventListener("click", saveSubadminSecurityToken);
+if($("storeSubadminTokenBtn")) $("storeSubadminTokenBtn").addEventListener("click", storeLocalSubadminToken);
+if($("clearSubadminTokenBtn")) $("clearSubadminTokenBtn").addEventListener("click", clearStoredSubadminToken);
+$("createExamBtn").addEventListener("click", createExam);
+$("saveExamOptionsBtn").addEventListener("click", saveExamOptions);
+$("examConfigSelect").addEventListener("change", loadSelectedExamConfig);
+$("generateResultLinkBtn").addEventListener("click", ()=>generateResultCheckerLink(true));
+$("copyResultLinkBtn").addEventListener("click", copyResultCheckerLink);
+$("resultLinkExamSelect").addEventListener("change", ()=>generateResultCheckerLink(false));
+$("addCandidateBtn").addEventListener("click", addCandidate);
+$("importCandidatesBtn").addEventListener("click", importCandidates);
+if($("downloadCandidatesTemplateBtn")) $("downloadCandidatesTemplateBtn").addEventListener("click", downloadCandidateTemplate);
+$("exportCandidatesPdfBtn").addEventListener("click", exportCandidatesPdf);
+$("generateAccountsBtn").addEventListener("click", generateAccounts);
+if($("createSubadminBtn")) $("createSubadminBtn").addEventListener("click", createSubadmin);
+if($("usersCreateSubadminBtn")) $("usersCreateSubadminBtn").addEventListener("click", createSubadmin);
+$("downloadGeneratedBtn").addEventListener("click", downloadLastGenerated);
+$("questionExamSelect").addEventListener("change", function(){ resetQuestionForm(); loadQuestionsForSelectedExam(); });
+if($("questionExamSearch")) $("questionExamSearch").addEventListener("input", function(){ renderQuestionExamOptions($("questionExamSelect").value || ""); });
+if($("questionExamFilter")) $("questionExamFilter").addEventListener("change", function(){ renderQuestionExamOptions($("questionExamSelect").value || ""); });
+$("questionShowDeleted").addEventListener("change", renderQuestions);
+$("selectAllQuestionsBtn").addEventListener("click", selectAllVisibleQuestions);
+$("addQuestionBtn").addEventListener("click", addQuestion);
+$("updateQuestionBtn").addEventListener("click", updateQuestion);
+$("cancelQuestionEditBtn").addEventListener("click", resetQuestionForm);
+$("importQuestionsBtn").addEventListener("click", importQuestions);
+if($("downloadQuestionsTemplateBtn")) $("downloadQuestionsTemplateBtn").addEventListener("click", downloadQuestionTemplate);
+$("deleteSelectedQuestionsBtn").addEventListener("click", bulkDeleteSelectedQuestions);
+$("restoreSelectedQuestionsBtn").addEventListener("click", bulkRestoreSelectedQuestions);
+$("hardDeleteSelectedQuestionsBtn").addEventListener("click", bulkHardDeleteSelectedQuestions);
+$("clearQuestionsBtn").addEventListener("click", clearQuestionsByExam);
+$("createPermissionBtn").addEventListener("click", createPermissionCode);
+$("clearPermissionCodesBtn").addEventListener("click", clearPermissionCodes);
+$("loadResultsBtn").addEventListener("click", loadResultsByExam);
+if($("resultsShowDeleted")) $("resultsShowDeleted").addEventListener("change", loadResultsByExam);
+if($("selectAllResultsBtn")) $("selectAllResultsBtn").addEventListener("click", selectAllVisibleResults);
+if($("publishSelectedResultsBtn")) $("publishSelectedResultsBtn").addEventListener("click", ()=>runBulkResultAction("bulkSetResultPublished",{ published:true }));
+if($("hideSelectedResultsBtn")) $("hideSelectedResultsBtn").addEventListener("click", ()=>runBulkResultAction("bulkSetResultPublished",{ published:false }));
+if($("deleteSelectedResultsBtn")) $("deleteSelectedResultsBtn").addEventListener("click", ()=>runBulkResultAction("bulkDeleteResults", {}, "Delete selected results?"));
+if($("restoreSelectedResultsBtn")) $("restoreSelectedResultsBtn").addEventListener("click", ()=>runBulkResultAction("bulkRestoreResults"));
+if($("hardDeleteSelectedResultsBtn")) $("hardDeleteSelectedResultsBtn").addEventListener("click", ()=>runBulkResultAction("bulkHardDeleteResults", {}, "Delete selected results forever? This cannot be undone."));
+$("exportResultsBtn").addEventListener("click", exportResultsByExam);
+$("exportResultsPdfBtn").addEventListener("click", exportResultsPdf);
+if($("loadSnapshotsBtn")) $("loadSnapshotsBtn").addEventListener("click", loadSnapshots);
+if($("loadAudioBtn")) $("loadAudioBtn").addEventListener("click", loadAudio);
+if($("loadVideosBtn")) $("loadVideosBtn").addEventListener("click", loadVideos);
+if($("loadScreensBtn")) $("loadScreensBtn").addEventListener("click", loadScreens);
+if($("snapshotsShowDeleted")) $("snapshotsShowDeleted").addEventListener("change", ()=>{ if($("snapshotsBox").innerHTML) loadSnapshots(); if($("audioBox").innerHTML) loadAudio(); if($("videosBox").innerHTML) loadVideos(); if($("screenBox") && $("screenBox").innerHTML) loadScreens(); });
+if($("selectAllSnapshotsBtn")) $("selectAllSnapshotsBtn").addEventListener("click", selectAllVisibleSnapshots);
+if($("deleteSelectedSnapshotsBtn")) $("deleteSelectedSnapshotsBtn").addEventListener("click", ()=>runBulkSnapshotAction("bulkDeleteSnapshots","Delete selected snapshots?"));
+if($("restoreSelectedSnapshotsBtn")) $("restoreSelectedSnapshotsBtn").addEventListener("click", ()=>runBulkSnapshotAction("bulkRestoreSnapshots"));
+if($("hardDeleteSelectedSnapshotsBtn")) $("hardDeleteSelectedSnapshotsBtn").addEventListener("click", ()=>runBulkSnapshotAction("bulkHardDeleteSnapshots","Delete selected snapshots forever? This cannot be undone."));
+if($("examSearch")) $("examSearch").addEventListener("input", renderExams);
+if($("examStatusFilter")) $("examStatusFilter").addEventListener("change", renderExams);
+$("candidateSearch").addEventListener("input", renderCandidates);
+$("questionSearch").addEventListener("input", renderQuestions);
+
+(async function init(){ if(await validatePortal()) await showPortal(); })();
+</script>
+</body>
+</html>

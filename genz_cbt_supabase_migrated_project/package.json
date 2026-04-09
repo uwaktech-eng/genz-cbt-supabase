@@ -1,0 +1,9 @@
+{
+  "name": "genz-cbt-supabase-migration",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Migrated Genz CBT Pro using Supabase + Vercel API",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.4"
+  }
+}

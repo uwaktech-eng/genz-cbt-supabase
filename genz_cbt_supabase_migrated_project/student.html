@@ -1,0 +1,1541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>CBT Student Portal</title>
+<link id="siteFavicon" rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%23081224%22/%3E%3Ctext x=%2250%25%22 y=%2254%25%22 font-size=%2232%22 text-anchor=%22middle%22 fill=%22%23facc15%22 font-family=%22Arial%22 dy=%22.1em%22%3EG%3C/text%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#eef2ff;
+  --bg-2:#f8fbff;
+  --panel:rgba(255,255,255,.82);
+  --line:#dbe4f3;
+  --text:#0f172a;
+  --muted:#64748b;
+  --primary:#1e1b4b;
+  --primary-2:#312e81;
+  --success:#15803d;
+  --danger:#dc2626;
+  --warning:#9a3412;
+  --shadow:0 16px 38px rgba(15,23,42,.10);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  font-family:Inter,Arial,sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(99,102,241,.12), transparent 26%),
+    radial-gradient(circle at top right, rgba(14,165,233,.12), transparent 24%),
+    linear-gradient(180deg,var(--bg),var(--bg-2));
+  color:var(--text);
+}
+header{
+  position:sticky;
+  top:0;
+  z-index:25;
+  background:rgba(30,27,75,.94);
+  color:#fff;
+  border-bottom:1px solid rgba(255,255,255,.08);
+  backdrop-filter:blur(10px);
+}
+.head{
+  max-width:1100px;
+  margin:auto;
+  padding:14px 16px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.head a{color:#facc15;text-decoration:none;font-weight:700}
+.container{max-width:980px;margin:24px auto;padding:0 16px 40px}
+.card{
+  background:var(--panel);
+  border-radius:18px;
+  padding:18px;
+  box-shadow:var(--shadow);
+  border:1px solid rgba(255,255,255,.55);
+  backdrop-filter:blur(14px);
+  margin-bottom:18px;
+  min-width:0;
+}
+label{display:block;font-weight:700;margin-bottom:6px;font-size:14px}
+input[type="text"],input[type="password"]{
+  width:100%;
+  padding:12px 14px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  margin-bottom:14px;
+  font-size:15px;
+  background:rgba(255,255,255,.95);
+}
+button{
+  border:none;border-radius:12px;min-height:44px;padding:0 16px;font-weight:700;cursor:pointer;
+  margin-right:8px;margin-bottom:8px;background:linear-gradient(135deg,var(--primary),var(--primary-2));
+  color:#fff;transition:.2s transform,.2s opacity,.2s box-shadow;
+}
+button:hover{transform:translateY(-1px)}
+.success{background:var(--success)}
+.ghost{background:#eef2ff;color:#243b67}
+.hidden{display:none!important}
+.status{font-size:14px;margin-top:6px;min-height:18px}
+.error{color:#b91c1c}
+.ok{color:#166534}
+.timer{
+  position:sticky;top:78px;z-index:10;font-size:18px;font-weight:800;color:#dc2626;background:#fff7f7;
+  border:1px solid #fecaca;border-radius:14px;padding:12px 14px;margin-bottom:16px;
+}
+.question-shell{display:grid;gap:16px}
+.question-nav{
+  position:sticky;top:134px;z-index:9;display:flex;flex-wrap:wrap;gap:8px;padding:12px;
+  background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:16px;backdrop-filter:blur(8px);
+}
+.qnum{min-width:40px;height:40px;border:none;border-radius:10px;background:#eef2ff;color:#1e293b;font-weight:800;cursor:pointer}
+.qnum.answered{background:#dcfce7;color:#166534}
+.qnum.active{outline:2px solid #4338ca}
+.question-block{
+  border:1px solid #e2e8f0;border-radius:16px;background:rgba(248,250,252,.92);padding:16px;
+}
+.question-title{font-weight:700;margin-bottom:12px;line-height:1.6}
+.question-image{
+  max-width:100%;width:auto;max-height:280px;border:1px solid #ddd;border-radius:10px;display:block;margin:12px auto;background:#fff;
+}
+.option{
+  display:block;padding:12px;margin-bottom:10px;background:#fff;border:1px solid #cbd5e1;border-radius:10px;cursor:pointer;line-height:1.5;
+}
+.option input{margin-right:8px}
+.result-box{line-height:1.9;font-size:16px}
+.auth-wrap{
+  max-width:860px;margin:30px auto;padding:0 16px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;
+}
+.notice{
+  background:#fff7ed;border:1px solid #fdba74;color:var(--warning);padding:12px 14px;border-radius:12px;margin-bottom:16px;
+}
+.info{
+  background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;padding:12px 14px;border-radius:12px;margin-bottom:14px;
+}
+.actions{display:flex;flex-wrap:wrap;gap:10px}
+.loader-overlay{
+  position:fixed;inset:0;background:rgba(7,17,34,.35);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:999;padding:16px;
+}
+.loader-overlay.show{display:flex}
+.loader-card{
+  width:min(100%,340px);background:#fff;padding:18px 20px;border-radius:18px;display:flex;align-items:center;gap:12px;border:1px solid var(--line);box-shadow:0 10px 30px rgba(0,0,0,.12);
+}
+.spinner{
+  width:20px;height:20px;border:3px solid #dbe5f4;border-top-color:#4338ca;border-radius:50%;animation:spin 1s linear infinite;
+}
+.exam-protected,.exam-protected *{
+  -webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;
+}
+.camera-monitor{
+  position:fixed;right:14px;bottom:14px;width:170px;background:rgba(15,23,42,.94);color:#fff;border:1px solid rgba(255,255,255,.12);
+  border-radius:16px;overflow:hidden;z-index:9998;box-shadow:0 18px 40px rgba(0,0,0,.28);backdrop-filter:blur(8px);
+}
+.camera-monitor video{
+  width:100%;height:128px;object-fit:cover;display:block;background:#000;transform:scaleX(-1);
+}
+.camera-head{
+  padding:8px 10px;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px;
+}
+.camera-dot{
+  width:8px;height:8px;border-radius:999px;background:#22c55e;box-shadow:0 0 10px rgba(34,197,94,.9);
+}
+.proctor-alert{
+  margin-top:10px;padding:10px 12px;border-radius:12px;border:1px solid #fecaca;background:#fff1f2;color:#b91c1c;font-size:13px;
+}
+.warning-overlay{
+  position:fixed;inset:0;z-index:9997;background:rgba(15,23,42,.55);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:16px;
+}
+.warning-overlay.show{display:flex}
+.warning-card{
+  width:min(100%,560px);background:rgba(255,255,255,.96);border:1px solid rgba(255,255,255,.75);border-radius:22px;box-shadow:0 24px 60px rgba(0,0,0,.22);padding:22px;
+}
+.warning-card h3{margin:0 0 10px;font-size:1.2rem}
+.warning-list{margin:12px 0 18px;padding-left:20px;color:#334155;line-height:1.7}
+.warning-banner{
+  padding:12px 14px;border-radius:14px;background:#fff7ed;border:1px solid #fdba74;color:#9a3412;font-size:14px;margin-bottom:14px;
+}
+.violation-float{
+  position:fixed;top:86px;left:50%;transform:translateX(-50%) translateY(-30px) scale(.94);
+  width:min(92vw,540px);z-index:10000;opacity:0;pointer-events:none;
+  transition:opacity .35s ease, transform .38s cubic-bezier(.2,.8,.2,1);
+}
+.violation-float.show{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}
+.violation-card{
+  background:rgba(127,29,29,.97);color:#fff;border:1px solid rgba(255,255,255,.16);border-radius:18px;box-shadow:0 20px 48px rgba(0,0,0,.30);padding:14px 16px;backdrop-filter:blur(10px);
+}
+.violation-title{font-size:15px;font-weight:800;margin-bottom:6px}
+.violation-text{font-size:13px;line-height:1.6;color:rgba(255,255,255,.92)}
+.violation-progress{
+  margin-top:10px;height:8px;background:rgba(255,255,255,.16);border-radius:999px;overflow:hidden;
+}
+.violation-progress > span{
+  display:block;height:100%;width:0%;background:linear-gradient(90deg,#facc15,#fb7185);transition:width .2s linear;
+}
+.camera-help{font-size:12px;color:#475569;margin-top:8px}
+.resume-note{
+  margin-top:10px;padding:10px 12px;border-radius:12px;background:#ecfeff;border:1px solid #a5f3fc;color:#155e75;font-size:13px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (max-width:900px){.auth-wrap{grid-template-columns:1fr}}
+@media (max-width:640px){
+  .container{padding:0 12px 28px}.auth-wrap{padding:0 12px}.card{padding:16px;border-radius:16px}.head{padding:12px}
+  .timer{top:70px}.question-nav{top:124px}.actions{flex-direction:column}.actions > *{width:100%;margin-right:0}
+  .qnum{min-width:36px;height:36px}.camera-monitor{width:118px;right:10px;bottom:10px}.camera-monitor video{height:88px}
+  .warning-card{padding:18px}.violation-float{top:76px}
+}
+</style>
+</head>
+<body>
+<div class="loader-overlay" id="loader">
+  <div class="loader-card"><div class="spinner"></div><div id="loaderText">Loading...</div></div>
+</div>
+
+<header>
+  <div class="head">
+    <h1 id="examTitleHeader" style="margin:0;font-size:1.2rem;">CBT Examination</h1>
+    <div class="actions">
+      <a href="index.html">← Back Home</a>
+      <button id="logoutBtn" class="ghost hidden" type="button">Logout</button>
+    </div>
+  </div>
+</header>
+
+<div id="authSection">
+  <div class="auth-wrap">
+    <div class="card">
+      <h2>Student Login</h2>
+      <label>Username</label>
+      <input type="text" id="loginUsername" autocomplete="username">
+      <label>Password</label>
+      <input type="password" id="loginPassword" autocomplete="current-password">
+      <button class="success" id="loginBtn" type="button">Login</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="ghost" id="forgotBtn" type="button">Forgot / Reset Password</button><button class="ghost hidden" id="changePasswordBtn" type="button">Change Password</button></div>
+      <div id="loginStatus" class="status"></div>
+    </div>
+
+    <div class="card">
+      <h2>Student Signup</h2>
+      <p style="margin-top:0;color:#475569;font-size:14px;">Use this only if your system allows students to create their own accounts. If the admin generated accounts, log in with the username and password given.</p>
+      <label>Full Name</label>
+      <input type="text" id="signupFullName">
+      <label>Username</label>
+      <input type="text" id="signupUsername">
+      <label>Password</label>
+      <input type="password" id="signupPassword">
+      <button class="success" id="signupBtn" type="button">Sign Up</button>
+      <div id="signupStatus" class="status"></div>
+    </div>
+  </div>
+</div>
+
+<div id="portalSection" class="hidden">
+  <div class="container">
+    <div id="portalNoticeBox" class="notice hidden"></div>
+
+    <div class="card" id="verifyCard">
+      <h2>Candidate Verification</h2>
+      <div class="info">Enter your registered details first. Your admin or supervisor will give you the correct exam code when it is time to start.</div>
+      <label for="fullName">Full Name</label>
+      <input type="text" id="fullName" placeholder="Enter your registered full name">
+      <label for="regId">Registration ID</label>
+      <input type="text" id="regId" placeholder="Enter your registration ID">
+      <button id="verifyBtn" type="button">Verify</button>
+      <div id="verifyStatus" class="status"></div>
+    </div>
+
+    <div class="card hidden" id="unlockCard">
+      <h2>Unlock CBT</h2>
+      <p>Enter the exam code given to you by the admin or invigilator.</p>
+      <label for="unlockRegId">Registration ID</label>
+      <input type="text" id="unlockRegId">
+      <label for="examCodeInput">Exam Code</label>
+      <input type="text" id="examCodeInput" placeholder="Enter the exam code given to you">
+      <label for="permissionCode">Permission Code (optional for rewrite)</label>
+      <input type="text" id="permissionCode" placeholder="Enter admin permission code if given">
+      <div class="camera-help">Camera and microphone access are compulsory before the exam starts.</div>
+      <div id="resumeNoteBox" class="resume-note hidden">We found your saved exam session. The system is preparing to continue from where you stopped.</div>
+      <button id="unlockBtn" type="button">Unlock Exam</button>
+      <div id="unlockStatus" class="status"></div>
+    </div>
+
+    <div class="card hidden" id="examCard">
+      <div class="timer">Time Left: <span id="timeLeft">00:00</span></div>
+      <div id="questionNavigator" class="question-nav"></div>
+      <form id="examForm" class="question-shell"></form>
+      <div class="actions">
+        <button class="success" id="submitBtn" type="button">Submit Exam</button>
+      </div>
+      <div id="submitStatus" class="status"></div>
+    </div>
+
+    <div class="card hidden" id="resultCard">
+      <h2>Exam Submitted</h2>
+      <div class="result-box" id="resultBox"></div>
+    </div>
+  </div>
+</div>
+
+<div id="cameraMonitor" class="camera-monitor hidden">
+  <div class="camera-head">
+    <span>Live Camera</span>
+    <span class="camera-dot"></span>
+  </div>
+  <video id="cameraFeed" autoplay playsinline muted></video>
+</div>
+
+<div id="warningOverlay" class="warning-overlay">
+  <div class="warning-card">
+    <h3>Exam Instructions & Consequences</h3>
+    <div class="warning-banner">Camera access is compulsory. Your face must remain visible during the exam.</div>
+    <ul class="warning-list">
+      <li>Right-click, copy, cut, paste, drag, and text selection are disabled during the exam.</li>
+      <li>If you switch tabs, minimize the page, or move away from the exam window <strong>4 times</strong>, the exam will be submitted automatically.</li>
+      <li>Your camera must stay on throughout the exam.</li>
+      <li>Do not refresh, close, or leave the page unless instructed.</li>
+      <li>By continuing, you agree to these monitoring rules.</li>
+    </ul>
+    <div class="actions">
+      <button type="button" id="cancelStartBtn" class="ghost">Cancel</button>
+      <button type="button" id="continueStartBtn">I Understand, Start Exam</button>
+    </div>
+  </div>
+</div>
+
+<div id="violationFloat" class="violation-float">
+  <div class="violation-card">
+    <div class="violation-title" id="violationTitle">Warning</div>
+    <div class="violation-text" id="violationText">You switched away from the exam.</div>
+    <div class="violation-progress"><span id="violationProgressBar"></span></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="api-client.js"></script>
+<script>
+const APPS_SCRIPT_URL = "/api/router";
+async function loadSiteFavicon(){ try{ const u=new URL(APPS_SCRIPT_URL); u.searchParams.set('action','getPublicSiteContent'); u.searchParams.set('_ts',Date.now()); const res=await fetch(u.toString()); const json=await res.json(); const url=json && json.data && (json.data.siteFaviconUrl || json.data.resultBrandLogoUrl); if(url && document.getElementById('siteFavicon')) document.getElementById('siteFavicon').href=url; }catch(err){} }
+const TOKEN_KEY = "cbt_auth_token";
+const ROLE_KEY = "cbt_auth_role";
+const USERNAME_KEY = "cbt_auth_username";
+const STUDENT_STATE_KEY = "cbt_student_resume_state_v2";
+
+const $ = id => document.getElementById(id);
+const loader = $("loader");
+const loaderText = $("loaderText");
+
+let verifiedCandidate = null;
+let currentQuestions = [];
+let timer = null;
+let autosaveTimer = null;
+let timeRemaining = 0;
+let examStarted = false;
+let cameraStream = null;
+let audioStream = null;
+let audioRecorder = null;
+let audioChunkIndex = 0;
+let audioStopPromise = null;
+let videoRecorder = null;
+let videoChunkIndex = 0;
+let videoStopPromise = null;
+let screenStream = null;
+let screenRecorder = null;
+let screenChunkIndex = 0;
+let screenStopPromise = null;
+let snapshotTimer = null;
+let currentExamMedia = { captureSnapshots:true, recordAudio:false, recordVideo:false, recordScreen:false };
+let violationCount = 0;
+let lastViolationAt = 0;
+let protectionArmed = false;
+let pendingUnlockData = null;
+let violationToastTimer = null;
+let violationProgressTimer = null;
+let pendingViolationReason = "";
+let pendingViolationCount = 0;
+
+function showLoader(text = "Loading..."){ loaderText.textContent = text; loader.classList.add("show"); }
+function hideLoader(){ loader.classList.remove("show"); }
+
+function getToken(){ return localStorage.getItem(TOKEN_KEY) || ""; }
+function setAuth(data){
+  localStorage.setItem(TOKEN_KEY, data.token);
+  localStorage.setItem(ROLE_KEY, data.role);
+  localStorage.setItem(USERNAME_KEY, data.username);
+}
+function clearAuth(){
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(ROLE_KEY);
+  localStorage.removeItem(USERNAME_KEY);
+}
+function esc(value){
+  return String(value == null ? "" : value)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
+function getStudentState(){
+  try{ return JSON.parse(localStorage.getItem(STUDENT_STATE_KEY) || "{}"); }catch(err){ return {}; }
+}
+function saveStudentState(patch = {}){
+  const current = getStudentState();
+  const merged = Object.assign({}, current, patch);
+  localStorage.setItem(STUDENT_STATE_KEY, JSON.stringify(merged));
+}
+function clearStudentState(){ localStorage.removeItem(STUDENT_STATE_KEY); }
+
+function snapshotLocalExamState(){
+  return {
+    verifiedCandidate: verifiedCandidate,
+    examCode: $("examCodeInput").value.trim(),
+    permissionCode: $("permissionCode").value.trim(),
+    examStarted: examStarted,
+    currentQuestions: currentQuestions,
+    remainingSeconds: timeRemaining,
+    answers: collectAnswers(),
+    violationCount: violationCount,
+    pendingViolationReason: pendingViolationReason,
+    pendingViolationCount: pendingViolationCount,
+    currentExamMedia: currentExamMedia
+  };
+}
+
+function populateFromSavedState(){
+  const state = getStudentState();
+  if (!state || !state.verifiedCandidate) return false;
+
+  verifiedCandidate = state.verifiedCandidate;
+  if (state.currentExamMedia) currentExamMedia = state.currentExamMedia;
+  $("fullName").value = state.verifiedCandidate.fullName || "";
+  $("regId").value = state.verifiedCandidate.regId || "";
+  $("unlockRegId").value = state.verifiedCandidate.regId || "";
+  $("examCodeInput").value = state.examCode || "";
+  $("permissionCode").value = state.permissionCode || "";
+
+  $("unlockCard").classList.remove("hidden");
+  $("resumeNoteBox").classList.toggle("hidden", !state.examCode);
+  return true;
+}
+
+async function apiRequest(action, payload = null, method = "POST")
+{
+  return window.AppApi.request(action, payload || {}, method);
+}
+
+function setStatus(id, message, ok = false){
+  const el = $(id);
+  if (!el) return;
+  el.className = "status " + (ok ? "ok" : "error");
+  el.textContent = message || "";
+}
+
+async function validatePortal(role){
+  const token = getToken();
+  if (!token) return false;
+  const res = await apiRequest("validateSession", { token }, "POST");
+  if (!res.ok || !res.data || res.data.role !== role){
+    clearAuth();
+    return false;
+  }
+  return true;
+}
+
+function formatTime(seconds){
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return String(mins).padStart(2, "0") + ":" + String(secs).padStart(2, "0");
+}
+
+async function loadPublicState(){
+  const res = await apiRequest("getSettings", {}, "GET");
+  if (res.ok && res.data && res.data.portalLocked){
+    $("portalNoticeBox").textContent = res.data.portalNotice || "CBT is currently locked.";
+    $("portalNoticeBox").classList.remove("hidden");
+  } else {
+    $("portalNoticeBox").classList.add("hidden");
+    $("portalNoticeBox").textContent = "";
+  }
+}
+
+async function showPortal(){
+  $("authSection").classList.add("hidden");
+  $("portalSection").classList.remove("hidden");
+  $("logoutBtn").classList.remove("hidden");
+  if($("changePasswordBtn")) $("changePasswordBtn").classList.remove("hidden");
+  await loadPublicState();
+}
+
+async function signupStudent(){
+  showLoader("Creating account...");
+  const res = await apiRequest("signup", {
+    fullName:$("signupFullName").value.trim(),
+    username:$("signupUsername").value.trim(),
+    password:$("signupPassword").value,
+    role:"student"
+  }, "POST");
+  hideLoader();
+  setStatus("signupStatus", res.message, res.ok);
+}
+
+async function loginStudent(){
+  showLoader("Signing in...");
+  const res = await apiRequest("login", {
+    username:$("loginUsername").value.trim(),
+    password:$("loginPassword").value,
+    role:"student"
+  }, "POST");
+  hideLoader();
+  setStatus("loginStatus", res.message, res.ok);
+  if (res.ok && res.data){
+    setAuth(res.data);
+    await showPortal();
+    populateFromSavedState();
+    await tryAutoResumeFromSavedState();
+  }
+}
+
+async function forgotStudentPassword(){
+  const username = prompt('Enter your student username.');
+  if(username === null) return;
+  const regId = prompt('Enter your registration ID.');
+  if(regId === null) return;
+  const fullName = prompt('Enter your full name exactly as saved.');
+  if(fullName === null) return;
+  const newPassword = prompt('Enter your new password (minimum 6 characters).');
+  if(newPassword === null) return;
+  const confirmPassword = prompt('Confirm your new password.');
+  if(confirmPassword === null) return;
+  if(newPassword !== confirmPassword) return setStatus('loginStatus','Passwords do not match.');
+  showLoader('Resetting password...');
+  const res = await apiRequest('resetForgottenPassword',{username:username.trim(), regId:regId.trim(), fullName:fullName.trim(), newPassword:newPassword, role:'student'},'POST');
+  hideLoader();
+  setStatus('loginStatus', res.message, res.ok);
+  if(res.ok){ $('loginUsername').value = username.trim(); $('loginPassword').value = ''; }
+}
+
+async function changeOwnStudentPassword(){
+  const currentPassword = prompt('Enter your current password.');
+  if(currentPassword === null) return;
+  const newPassword = prompt('Enter your new password (minimum 6 characters).');
+  if(newPassword === null) return;
+  const confirmPassword = prompt('Confirm your new password.');
+  if(confirmPassword === null) return;
+  if(newPassword !== confirmPassword) return alert('Passwords do not match.');
+  showLoader('Updating password...');
+  const res = await apiRequest('changePassword',{currentPassword, newPassword},'POST');
+  hideLoader();
+  if (res.ok && res.data){
+    setAuth(res.data);
+  }
+  alert(res.message);
+}
+
+async function verifyCandidate(){
+  showLoader("Verifying candidate...");
+  const payload = {
+    fullName:$("fullName").value.trim(),
+    regId:$("regId").value.trim()
+  };
+  const res = await apiRequest("verifyCandidate", payload, "POST");
+  hideLoader();
+  setStatus("verifyStatus", res.message, res.ok);
+
+  if (res.ok && res.data){
+    verifiedCandidate = {
+      fullName:res.data.fullName || payload.fullName,
+      regId:res.data.regId || payload.regId
+    };
+    $("unlockRegId").value = verifiedCandidate.regId;
+    $("unlockCard").classList.remove("hidden");
+    $("resumeNoteBox").classList.add("hidden");
+    saveStudentState({
+      verifiedCandidate: verifiedCandidate,
+      examCode: "",
+      permissionCode: "",
+      examStarted: false,
+      currentQuestions: [],
+      remainingSeconds: 0,
+      answers: [],
+      violationCount: 0,
+      pendingViolationReason: "",
+      pendingViolationCount: 0
+    });
+  } else {
+    await loadPublicState();
+  }
+}
+
+function collectAnswers(){
+  return currentQuestions.map((q, index) => {
+    const selected = document.querySelector(`input[name="question_${index}"]:checked`);
+    return { questionId:q.id, selected:selected ? selected.value : "" };
+  });
+}
+
+function applySavedAnswers(savedAnswers){
+  if (!Array.isArray(savedAnswers) || !savedAnswers.length) return;
+  const byId = {};
+  savedAnswers.forEach(a => { byId[String(a.questionId || "")] = String(a.selected || ""); });
+  currentQuestions.forEach((q, index) => {
+    const selected = byId[String(q.id)];
+    if (!selected) return;
+    const input = document.querySelector(`input[name="question_${index}"][value="${selected}"]`);
+    if (input) input.checked = true;
+  });
+}
+
+function renderQuestionNav(){
+  $("questionNavigator").innerHTML = currentQuestions.map((q, index) => `
+    <button type="button" class="qnum" id="qnav_${index}" onclick="jumpToQuestion(${index})">${index + 1}</button>
+  `).join("");
+  updateQuestionNavState();
+}
+
+function updateQuestionNavState(){
+  currentQuestions.forEach((q, index) => {
+    const btn = $("qnav_" + index);
+    if (!btn) return;
+    const checked = document.querySelector(`input[name="question_${index}"]:checked`);
+    btn.classList.toggle("answered", !!checked);
+  });
+}
+
+function jumpToQuestion(index){
+  const target = $("qblock_" + index);
+  if (!target) return;
+  document.querySelectorAll(".qnum").forEach(el => el.classList.remove("active"));
+  const btn = $("qnav_" + index);
+  if (btn) btn.classList.add("active");
+  target.scrollIntoView({ behavior:"smooth", block:"start" });
+}
+
+function renderQuestions(questions){
+  $("examForm").innerHTML = questions.map((q, index) => `
+    <div class="question-block" id="qblock_${index}">
+      <div class="question-title">${index + 1}. ${esc(q.question)}</div>
+      ${q.imageUrl ? `<img src="${esc(q.imageUrl)}" class="question-image" alt="Question image">` : ""}
+      <label class="option"><input type="radio" name="question_${index}" value="A"> A. ${esc(q.optionA)}</label>
+      <label class="option"><input type="radio" name="question_${index}" value="B"> B. ${esc(q.optionB)}</label>
+      <label class="option"><input type="radio" name="question_${index}" value="C"> C. ${esc(q.optionC)}</label>
+      <label class="option"><input type="radio" name="question_${index}" value="D"> D. ${esc(q.optionD)}</label>
+    </div>
+  `).join("");
+
+  document.querySelectorAll('#examForm input[type="radio"]').forEach(input => {
+    input.addEventListener("change", () => {
+      updateQuestionNavState();
+      saveStudentState(snapshotLocalExamState());
+    });
+  });
+
+  renderQuestionNav();
+}
+
+function stopTimers(){
+  clearInterval(timer);
+  clearInterval(autosaveTimer);
+}
+
+function showProctorAlert(message){
+  let box = $("proctorAlertBox");
+  if (!box){
+    box = document.createElement("div");
+    box.id = "proctorAlertBox";
+    box.className = "proctor-alert";
+    const examCard = $("examCard");
+    if (examCard) examCard.insertBefore(box, examCard.children[1] || null);
+  }
+  box.textContent = message;
+}
+
+function clearProctorAlert(){
+  const box = $("proctorAlertBox");
+  if (box) box.remove();
+}
+
+function showWarningOverlay(){ $("warningOverlay").classList.add("show"); }
+function hideWarningOverlay(){ $("warningOverlay").classList.remove("show"); }
+
+function showViolationFloat(reason, count){
+  clearTimeout(violationToastTimer);
+  clearInterval(violationProgressTimer);
+
+  const remaining = Math.max(0, 4 - count);
+  $("violationTitle").textContent = `Warning ${count}/4`;
+  $("violationText").textContent = `${reason}. ${remaining} ${remaining === 1 ? "chance" : "chances"} left before auto-submission.`;
+
+  const progress = $("violationProgressBar");
+  progress.style.width = `${Math.min(100, (count / 4) * 100)}%`;
+  $("violationFloat").classList.add("show");
+
+  let visual = (count / 4) * 100;
+  violationProgressTimer = setInterval(() => {
+    visual = Math.min(100, visual + 1.1);
+    progress.style.width = `${visual}%`;
+  }, 35);
+
+  violationToastTimer = setTimeout(() => {
+    $("violationFloat").classList.remove("show");
+    clearInterval(violationProgressTimer);
+  }, 6000);
+}
+
+function showPendingViolationIfAny(){
+  if (!pendingViolationReason || !pendingViolationCount) return;
+  showViolationFloat(pendingViolationReason, pendingViolationCount);
+  pendingViolationReason = "";
+  pendingViolationCount = 0;
+}
+
+function hideViolationFloat(){
+  clearTimeout(violationToastTimer);
+  clearInterval(violationProgressTimer);
+  $("violationFloat").classList.remove("show");
+}
+
+async function attachVideoStream(stream){
+  const video = $("cameraFeed");
+  video.srcObject = stream;
+  try{ await video.play(); }catch(err){}
+  $("cameraMonitor").classList.remove("hidden");
+  return true;
+}
+
+async function startCameraMonitor(){
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    setStatus("unlockStatus", "This browser does not support camera access.");
+    return false;
+  }
+
+  const baseTries = [
+    { video:{ facingMode:{ ideal:"user" }, width:{ ideal:1280 }, height:{ ideal:720 } }, audio:false },
+    { video:{ width:{ ideal:1280 }, height:{ ideal:720 } }, audio:false },
+    { video:{ width:{ ideal:640 }, height:{ ideal:480 } }, audio:false },
+    { video:true, audio:false }
+  ];
+
+  for (const constraints of baseTries){
+    try{
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      cameraStream = stream;
+      await attachVideoStream(stream);
+      return true;
+    }catch(error){}
+  }
+
+  try{
+    const temp = await navigator.mediaDevices.getUserMedia({ video:true, audio:false });
+    temp.getTracks().forEach(t => t.stop());
+
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const videoDevices = devices.filter(d => d.kind === "videoinput");
+
+    for (const device of videoDevices){
+      try{
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video:{
+            deviceId:{ exact:device.deviceId },
+            width:{ ideal:1280 },
+            height:{ ideal:720 }
+          },
+          audio:false
+        });
+        cameraStream = stream;
+        await attachVideoStream(stream);
+        return true;
+      }catch(error){}
+    }
+  }catch(error){}
+
+  setStatus("unlockStatus", "Camera permission is required before the exam can start.");
+  return false;
+}
+
+function stopCameraMonitor(){
+  stopSnapshotTimer();
+  try{ if (videoRecorder && videoRecorder.state === "recording") videoRecorder.stop(); }catch(err){}
+  videoRecorder = null;
+  if (cameraStream){
+    cameraStream.getTracks().forEach(track => track.stop());
+    cameraStream = null;
+  }
+  const video = $("cameraFeed");
+  if (video) video.srcObject = null;
+  $("cameraMonitor").classList.add("hidden");
+}
+
+async function stopScreenMonitor(flush = false){
+  const recorder = screenRecorder;
+  const stream = screenStream;
+  screenRecorder = null;
+  screenStream = null;
+  if (!recorder && stream){
+    try{ stream.getTracks().forEach(track => track.stop()); }catch(err){}
+    return;
+  }
+  if (!recorder) return;
+  screenStopPromise = new Promise(resolve => {
+    const finalize = () => {
+      try{ if (stream) stream.getTracks().forEach(track => track.stop()); }catch(err){}
+      resolve();
+    };
+    recorder.addEventListener('stop', finalize, { once:true });
+  });
+  try{ if (flush && recorder.state === 'recording') recorder.requestData(); }catch(err){}
+  try{ if (recorder.state !== 'inactive') recorder.stop(); else if (stream) stream.getTracks().forEach(track => track.stop()); }catch(err){ if (stream) stream.getTracks().forEach(track => track.stop()); }
+  await screenStopPromise;
+  screenStopPromise = null;
+}
+
+function pickScreenMimeType(){
+  return pickVideoMimeType();
+}
+
+async function uploadScreenBlob(blob, segmentLabel){
+  if (!blob || !blob.size || !verifiedCandidate) return;
+  const dataUrl = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+  const videoData = dataUrl.split(',')[1] || '';
+  if (!videoData) return;
+  await apiRequest('uploadScreenClip', {
+    examCode: $('examCodeInput').value.trim(),
+    regId: verifiedCandidate.regId,
+    fullName: verifiedCandidate.fullName,
+    mimeType: blob.type || pickScreenMimeType() || 'video/webm',
+    durationSeconds: 120,
+    segmentLabel: segmentLabel || ('clip_' + (++screenChunkIndex)),
+    videoData
+  }, 'POST');
+}
+
+async function startScreenMonitor(){
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia){
+    setStatus('unlockStatus', 'This browser does not support screen recording for this exam.');
+    return false;
+  }
+  try{
+    screenStream = await navigator.mediaDevices.getDisplayMedia({ video:true, audio:false });
+  }catch(error){
+    setStatus('unlockStatus', 'Screen sharing permission is required before the exam can start.');
+    return false;
+  }
+  if (!window.MediaRecorder){
+    setStatus('unlockStatus', 'This browser cannot record screen video for this exam.');
+    try{ screenStream.getTracks().forEach(track => track.stop()); }catch(err){}
+    screenStream = null;
+    return false;
+  }
+  try{
+    const mimeType = pickScreenMimeType();
+    screenRecorder = mimeType ? new MediaRecorder(screenStream, { mimeType }) : new MediaRecorder(screenStream);
+  }catch(error){
+    setStatus('unlockStatus', 'This browser could not start screen recording.');
+    try{ screenStream.getTracks().forEach(track => track.stop()); }catch(err){}
+    screenStream = null;
+    return false;
+  }
+  screenChunkIndex = 0;
+  const tracks = screenStream.getVideoTracks ? screenStream.getVideoTracks() : [];
+  if (tracks[0]) {
+    tracks[0].addEventListener('ended', function(){
+      if (examStarted){
+        showProctorAlert('Screen sharing was stopped during the exam.');
+        registerViolation('Screen sharing stopped');
+      }
+    });
+  }
+  screenRecorder.ondataavailable = async (event) => {
+    try{ if (event.data && event.data.size) await uploadScreenBlob(event.data, 'segment_' + (++screenChunkIndex)); }catch(err){}
+  };
+  try{
+    screenRecorder.start(120000);
+  }catch(error){
+    setStatus('unlockStatus', 'Unable to begin screen recording.');
+    try{ screenStream.getTracks().forEach(track => track.stop()); }catch(err){}
+    screenStream = null;
+    screenRecorder = null;
+    return false;
+  }
+  return true;
+}
+
+function pickAudioMimeType(){
+  if (window.MediaRecorder && MediaRecorder.isTypeSupported) {
+    const preferred = ['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg;codecs=opus','audio/ogg'];
+    for (const type of preferred) if (MediaRecorder.isTypeSupported(type)) return type;
+  }
+  return '';
+}
+
+async function uploadAudioBlob(blob, segmentLabel){
+  if (!blob || !blob.size || !verifiedCandidate) return;
+  const dataUrl = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+  const audioData = dataUrl.split(",")[1] || "";
+  if (!audioData) return;
+  await apiRequest("uploadAudioClip", {
+    examCode: $("examCodeInput").value.trim(),
+    regId: verifiedCandidate.regId,
+    fullName: verifiedCandidate.fullName,
+    mimeType: blob.type || pickAudioMimeType() || 'audio/webm',
+    durationSeconds: 120,
+    segmentLabel: segmentLabel || ("clip_" + (++audioChunkIndex)),
+    audioData
+  }, "POST");
+}
+
+async function startMicrophoneMonitor(){
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    setStatus("unlockStatus", "This browser does not support microphone access.");
+    return false;
+  }
+  try{
+    audioStream = await navigator.mediaDevices.getUserMedia({ audio:true, video:false });
+  }catch(error){
+    setStatus("unlockStatus", "Microphone permission is required before the exam can start.");
+    return false;
+  }
+  if (!window.MediaRecorder){
+    setStatus("unlockStatus", "This browser cannot record microphone audio for this exam.");
+    audioStream.getTracks().forEach(track => track.stop());
+    audioStream = null;
+    return false;
+  }
+  try{
+    const mimeType = pickAudioMimeType();
+    audioRecorder = mimeType ? new MediaRecorder(audioStream, { mimeType }) : new MediaRecorder(audioStream);
+  }catch(error){
+    setStatus("unlockStatus", "This browser could not start microphone recording.");
+    audioStream.getTracks().forEach(track => track.stop());
+    audioStream = null;
+    return false;
+  }
+  audioChunkIndex = 0;
+  audioRecorder.ondataavailable = async (event) => {
+    try{
+      if (event.data && event.data.size) await uploadAudioBlob(event.data, "segment_" + (++audioChunkIndex));
+    }catch(err){}
+  };
+  try{
+    audioRecorder.start(120000);
+  }catch(error){
+    setStatus("unlockStatus", "Unable to begin microphone recording.");
+    audioStream.getTracks().forEach(track => track.stop());
+    audioStream = null;
+    audioRecorder = null;
+    return false;
+  }
+  return true;
+}
+
+async function stopMicrophoneMonitor(flush = false){
+  const recorder = audioRecorder;
+  const stream = audioStream;
+  audioRecorder = null;
+  audioStream = null;
+  if (!recorder && stream){
+    stream.getTracks().forEach(track => track.stop());
+    return;
+  }
+  if (!recorder) return;
+  audioStopPromise = new Promise(resolve => {
+    const finalize = () => {
+      try{ if (stream) stream.getTracks().forEach(track => track.stop()); }catch(err){}
+      resolve();
+    };
+    recorder.addEventListener("stop", finalize, { once:true });
+  });
+  try{
+    if (flush && recorder.state === "recording") recorder.requestData();
+  }catch(err){}
+  try{
+    if (recorder.state !== "inactive") recorder.stop();
+    else if (stream) stream.getTracks().forEach(track => track.stop());
+  }catch(err){
+    if (stream) stream.getTracks().forEach(track => track.stop());
+  }
+  await audioStopPromise;
+  audioStopPromise = null;
+}
+
+function pickVideoMimeType(){
+  if (window.MediaRecorder && MediaRecorder.isTypeSupported) {
+    const preferred = ['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm','video/mp4'];
+    for (const type of preferred) if (MediaRecorder.isTypeSupported(type)) return type;
+  }
+  return '';
+}
+
+async function uploadVideoBlob(blob, segmentLabel){
+  if (!blob || !blob.size || !verifiedCandidate) return;
+  const dataUrl = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+  const videoData = dataUrl.split(",")[1] || "";
+  if (!videoData) return;
+  await apiRequest("uploadVideoClip", {
+    examCode: $("examCodeInput").value.trim(),
+    regId: verifiedCandidate.regId,
+    fullName: verifiedCandidate.fullName,
+    mimeType: blob.type || pickVideoMimeType() || 'video/webm',
+    durationSeconds: 120,
+    segmentLabel: segmentLabel || ("clip_" + (++videoChunkIndex)),
+    videoData
+  }, "POST");
+}
+
+async function startVideoMonitor(){
+  if (!cameraStream){
+    setStatus("unlockStatus", "Camera must be available before video recording can start.");
+    return false;
+  }
+  if (!window.MediaRecorder){
+    setStatus("unlockStatus", "This browser cannot record video for this exam.");
+    return false;
+  }
+  try{
+    const mimeType = pickVideoMimeType();
+    videoRecorder = mimeType ? new MediaRecorder(cameraStream, { mimeType }) : new MediaRecorder(cameraStream);
+  }catch(error){
+    setStatus("unlockStatus", "This browser could not start video recording.");
+    videoRecorder = null;
+    return false;
+  }
+  videoChunkIndex = 0;
+  videoRecorder.ondataavailable = async (event) => {
+    try{
+      if (event.data && event.data.size) await uploadVideoBlob(event.data, "segment_" + (++videoChunkIndex));
+    }catch(err){}
+  };
+  try{
+    videoRecorder.start(120000);
+  }catch(error){
+    setStatus("unlockStatus", "Unable to begin video recording.");
+    videoRecorder = null;
+    return false;
+  }
+  return true;
+}
+
+async function stopVideoMonitor(flush = false){
+  const recorder = videoRecorder;
+  videoRecorder = null;
+  if (!recorder) return;
+  videoStopPromise = new Promise(resolve => {
+    const finalize = () => resolve();
+    recorder.addEventListener("stop", finalize, { once:true });
+  });
+  try{
+    if (flush && recorder.state === "recording") recorder.requestData();
+  }catch(err){}
+  try{
+    if (recorder.state !== "inactive") recorder.stop();
+  }catch(err){}
+  await videoStopPromise;
+  videoStopPromise = null;
+}
+
+async function startRequiredMedia(){
+  const media = (pendingUnlockData && pendingUnlockData.response && pendingUnlockData.response.data) ? pendingUnlockData.response.data : (currentExamMedia || {});
+  const needCamera = !!(media.captureSnapshots || media.recordVideo);
+  const needAudio = !!media.recordAudio;
+  const needVideo = !!media.recordVideo;
+  const needScreen = !!media.recordScreen;
+  if (needCamera){
+    const cameraOk = await startCameraMonitor();
+    if (!cameraOk) return false;
+  }
+  if (needAudio){
+    const micOk = await startMicrophoneMonitor();
+    if (!micOk){
+      if (needCamera) stopCameraMonitor();
+      return false;
+    }
+  }
+  if (needVideo){
+    const videoOk = await startVideoMonitor();
+    if (!videoOk){
+      await stopMicrophoneMonitor(false);
+      if (needCamera) stopCameraMonitor();
+      return false;
+    }
+  }
+  if (needScreen){
+    const screenOk = await startScreenMonitor();
+    if (!screenOk){
+      await stopVideoMonitor(false);
+      await stopMicrophoneMonitor(false);
+      if (needCamera) stopCameraMonitor();
+      return false;
+    }
+  }
+  return true;
+}
+
+function stopSnapshotTimer(){
+  clearInterval(snapshotTimer);
+  snapshotTimer = null;
+}
+
+async function captureSnapshotAndUpload(){
+  if (!currentExamMedia.captureSnapshots) return;
+  if (!examStarted || !verifiedCandidate || !cameraStream) return;
+  const video = $("cameraFeed");
+  if (!video || !video.videoWidth || !video.videoHeight) return;
+  try{
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.82);
+    const imageData = dataUrl.split(",")[1] || "";
+    if (!imageData) return;
+    await apiRequest("uploadSnapshot", {
+      examCode: $("examCodeInput").value.trim(),
+      regId: verifiedCandidate.regId,
+      fullName: verifiedCandidate.fullName,
+      mimeType: "image/jpeg",
+      imageData
+    }, "POST");
+  }catch(err){}
+}
+
+function startSnapshotTimer(){
+  stopSnapshotTimer();
+  if (!currentExamMedia.captureSnapshots) return;
+  snapshotTimer = setInterval(() => { captureSnapshotAndUpload(); }, 120000);
+  setTimeout(() => { captureSnapshotAndUpload(); }, 8000);
+}
+
+function blockExamInteraction(e){
+  if (!examStarted) return;
+  const examCard = $("examCard");
+  if (!examCard || !examCard.contains(e.target)) return;
+  e.preventDefault();
+  showProctorAlert("Right-click, copy, cut, paste, drag, and text selection are disabled during the exam.");
+}
+
+function blockExamKeys(e){
+  if (!examStarted) return;
+  const key = (e.key || "").toLowerCase();
+  const ctrlLike = e.ctrlKey || e.metaKey;
+  if (ctrlLike && ["c","v","x","a","s","p","u"].includes(key)){
+    e.preventDefault();
+    showProctorAlert("Copy, paste, and shortcut actions are disabled during the exam.");
+  }
+}
+
+function registerViolation(reason){
+  if (!examStarted || !protectionArmed) return;
+
+  const now = Date.now();
+  if (now - lastViolationAt < 1500) return;
+  lastViolationAt = now;
+
+  violationCount++;
+  showProctorAlert(`Warning ${violationCount}/4: ${reason}. After 4 violations, your exam will be submitted automatically.`);
+
+  pendingViolationReason = reason;
+  pendingViolationCount = violationCount;
+
+  saveStudentState(snapshotLocalExamState());
+
+  if (!document.hidden && document.hasFocus()) showPendingViolationIfAny();
+
+  if (violationCount >= 4){
+    setStatus("submitStatus", "4 tab/minimize violations detected. Auto-submitting exam...");
+    submitExam(true);
+  }
+}
+
+function handleVisibilityViolation(){
+  if (document.hidden) registerViolation("You switched tabs or minimized the page");
+  else showPendingViolationIfAny();
+}
+
+function handleBlurViolation(){
+  if (!examStarted) return;
+  registerViolation("You moved away from the exam window");
+}
+
+function handleFocusReturn(){
+  if (!examStarted) return;
+  showPendingViolationIfAny();
+}
+
+function armExamProtection(restored = {}){
+  protectionArmed = true;
+  violationCount = Number(restored.violationCount || 0);
+  lastViolationAt = 0;
+  pendingViolationReason = restored.pendingViolationReason || "";
+  pendingViolationCount = Number(restored.pendingViolationCount || 0);
+
+  document.body.classList.add("exam-protected");
+  document.addEventListener("contextmenu", blockExamInteraction);
+  document.addEventListener("copy", blockExamInteraction);
+  document.addEventListener("cut", blockExamInteraction);
+  document.addEventListener("paste", blockExamInteraction);
+  document.addEventListener("selectstart", blockExamInteraction);
+  document.addEventListener("dragstart", blockExamInteraction);
+  document.addEventListener("keydown", blockExamKeys);
+  document.addEventListener("visibilitychange", handleVisibilityViolation);
+  window.addEventListener("blur", handleBlurViolation);
+  window.addEventListener("focus", handleFocusReturn);
+}
+
+function disarmExamProtection(){
+  protectionArmed = false;
+  violationCount = 0;
+  lastViolationAt = 0;
+  pendingViolationReason = "";
+  pendingViolationCount = 0;
+
+  document.body.classList.remove("exam-protected");
+  document.removeEventListener("contextmenu", blockExamInteraction);
+  document.removeEventListener("copy", blockExamInteraction);
+  document.removeEventListener("cut", blockExamInteraction);
+  document.removeEventListener("paste", blockExamInteraction);
+  document.removeEventListener("selectstart", blockExamInteraction);
+  document.removeEventListener("dragstart", blockExamInteraction);
+  document.removeEventListener("keydown", blockExamKeys);
+  document.removeEventListener("visibilitychange", handleVisibilityViolation);
+  window.removeEventListener("blur", handleBlurViolation);
+  window.removeEventListener("focus", handleFocusReturn);
+
+  clearProctorAlert();
+  hideViolationFloat();
+}
+
+function startTimer(){
+  stopTimers();
+  $("timeLeft").textContent = formatTime(timeRemaining);
+
+  timer = setInterval(() => {
+    timeRemaining = Math.max(0, timeRemaining - 1);
+    $("timeLeft").textContent = formatTime(timeRemaining);
+    saveStudentState(snapshotLocalExamState());
+    if (timeRemaining <= 0){
+      stopTimers();
+      submitExam();
+    }
+  }, 1000);
+
+  autosaveTimer = setInterval(() => {
+    autosaveProgress();
+  }, 15000);
+}
+
+async function autosaveProgress(){
+  if (!verifiedCandidate || !$("examCodeInput").value.trim()) return;
+  saveStudentState(snapshotLocalExamState());
+
+  if (!examStarted) return;
+
+  await apiRequest("autosaveProgress", {
+    examCode:$("examCodeInput").value.trim(),
+    regId:verifiedCandidate.regId,
+    fullName:verifiedCandidate.fullName,
+    remainingSeconds:timeRemaining,
+    answers:collectAnswers()
+  }, "POST");
+}
+
+async function resumeSavedProgress(examCode){
+  const local = getStudentState();
+  if (local && Array.isArray(local.answers) && local.answers.length){
+    timeRemaining = Number(local.remainingSeconds || timeRemaining || 0);
+    applySavedAnswers(local.answers);
+    updateQuestionNavState();
+  }
+
+  const res = await apiRequest("resumeProgress", {
+    examCode,
+    regId:verifiedCandidate.regId
+  }, "POST");
+
+  if (!res.ok || !res.data || !res.data.found) return false;
+
+  const remaining = Number(res.data.remainingSeconds || 0);
+  if (remaining <= 0) return false;
+
+  timeRemaining = remaining;
+  applySavedAnswers(res.data.answers || []);
+  updateQuestionNavState();
+  return true;
+}
+
+async function startExamSessionFromResponse(res, examCode, options = {}){
+  currentQuestions = res.data.questions || [];
+  currentExamMedia = { captureSnapshots: res.data.captureSnapshots !== false, recordAudio: !!res.data.recordAudio, recordVideo: !!res.data.recordVideo, recordScreen: !!res.data.recordScreen };
+  $("examTitleHeader").textContent = res.data.examTitle || "CBT Examination";
+
+  if (!currentQuestions.length){
+    setStatus("unlockStatus", "No questions available for this exam.");
+    return false;
+  }
+
+  const local = getStudentState();
+
+  renderQuestions(currentQuestions);
+  $("examCard").classList.remove("hidden");
+  $("unlockCard").classList.add("hidden");
+  $("verifyCard").classList.add("hidden");
+  examStarted = true;
+
+  timeRemaining = Number(res.data.durationMinutes || 20) * 60;
+  const resumed = await resumeSavedProgress(examCode);
+
+  if (!resumed){
+    const localRemaining = Number(local.remainingSeconds || 0);
+    if (localRemaining > 0) timeRemaining = localRemaining;
+    $("timeLeft").textContent = formatTime(timeRemaining);
+    if (local && Array.isArray(local.answers)) applySavedAnswers(local.answers);
+    updateQuestionNavState();
+  }
+
+  armExamProtection({
+    violationCount: Number(local.violationCount || 0),
+    pendingViolationReason: local.pendingViolationReason || "",
+    pendingViolationCount: Number(local.pendingViolationCount || 0)
+  });
+
+  startTimer();
+  startSnapshotTimer();
+  jumpToQuestion(0);
+
+  saveStudentState({
+    verifiedCandidate: verifiedCandidate,
+    examCode: examCode,
+    permissionCode: $("permissionCode").value.trim(),
+    examStarted: true,
+    currentQuestions: currentQuestions,
+    remainingSeconds: timeRemaining,
+    answers: collectAnswers(),
+    violationCount: violationCount,
+    pendingViolationReason: pendingViolationReason,
+    pendingViolationCount: pendingViolationCount,
+    currentExamMedia: currentExamMedia
+  });
+
+  return true;
+}
+
+async function tryAutoResumeFromSavedState(){
+  const state = getStudentState();
+  if (!state || !state.verifiedCandidate || !state.examCode || !state.examStarted) return false;
+
+  verifiedCandidate = state.verifiedCandidate;
+  if (state.currentExamMedia) currentExamMedia = state.currentExamMedia;
+  $("fullName").value = state.verifiedCandidate.fullName || "";
+  $("regId").value = state.verifiedCandidate.regId || "";
+  $("unlockRegId").value = state.verifiedCandidate.regId || "";
+  $("examCodeInput").value = state.examCode || "";
+  $("permissionCode").value = state.permissionCode || "";
+
+  $("unlockCard").classList.remove("hidden");
+  $("resumeNoteBox").classList.remove("hidden");
+
+  showLoader("Restoring your exam...");
+  const mediaOk = await startRequiredMedia();
+  if (!mediaOk){
+    hideLoader();
+    setStatus("unlockStatus", "Saved exam found. Please allow camera and microphone and unlock again to continue.");
+    return false;
+  }
+
+  const res = await apiRequest("unlockExam", {
+    regId: state.verifiedCandidate.regId,
+    examCode: state.examCode,
+    permissionCode: state.permissionCode || ""
+  }, "POST");
+
+  if (!res.ok || !res.data){
+    hideLoader();
+    stopCameraMonitor();
+    setStatus("unlockStatus", "We found your saved session. Please unlock again to continue.");
+    return false;
+  }
+
+  await startExamSessionFromResponse(res, state.examCode, { autoResume:true });
+  hideLoader();
+  return true;
+}
+
+async function unlockExam(){
+  const entered = $("unlockRegId").value.trim();
+  const examCode = $("examCodeInput").value.trim();
+
+  if (!verifiedCandidate) return setStatus("unlockStatus", "Please verify first.");
+  if (entered !== verifiedCandidate.regId) return setStatus("unlockStatus", "Registration ID does not match the verified candidate.");
+  if (!examCode) return setStatus("unlockStatus", "Exam code is required.");
+
+  showLoader("Checking exam access...");
+  const res = await apiRequest("unlockExam", {
+    regId:entered,
+    examCode:examCode,
+    permissionCode:$("permissionCode").value.trim()
+  }, "POST");
+  hideLoader();
+
+  setStatus("unlockStatus", res.message, res.ok);
+  if (!res.ok){
+    await loadPublicState();
+    return;
+  }
+
+  pendingUnlockData = { examCode, response: res };
+  saveStudentState({
+    verifiedCandidate: verifiedCandidate,
+    examCode: examCode,
+    permissionCode: $("permissionCode").value.trim(),
+    examStarted: false,
+    currentQuestions: [],
+    remainingSeconds: 0,
+    answers: [],
+    violationCount: Number(getStudentState().violationCount || 0),
+    pendingViolationReason: getStudentState().pendingViolationReason || "",
+    pendingViolationCount: Number(getStudentState().pendingViolationCount || 0)
+  });
+  showWarningOverlay();
+}
+
+async function proceedStartExam(){
+  if (!pendingUnlockData || !pendingUnlockData.response || !pendingUnlockData.response.data) return;
+
+  hideWarningOverlay();
+  showLoader("Starting exam security...");
+  const mediaOk = await startRequiredMedia();
+  if (!mediaOk){
+    hideLoader();
+    return;
+  }
+
+  const res = pendingUnlockData.response;
+  const examCode = pendingUnlockData.examCode;
+
+  await startExamSessionFromResponse(res, examCode, { autoResume:false });
+  hideLoader();
+}
+
+async function submitExam(isAuto = false){
+  if (!examStarted || !verifiedCandidate) return;
+  stopTimers();
+  examStarted = false;
+
+  showLoader(isAuto ? "Auto-submitting exam..." : "Submitting exam...");
+  const res = await apiRequest("submitExam", {
+    examCode:$("examCodeInput").value.trim(),
+    fullName:verifiedCandidate.fullName,
+    regId:verifiedCandidate.regId,
+    permissionCode:$("permissionCode").value.trim(),
+    answers:collectAnswers()
+  }, "POST");
+  hideLoader();
+
+  setStatus("submitStatus", res.message, res.ok);
+
+  if (!res.ok){
+    examStarted = true;
+    startTimer();
+    saveStudentState(snapshotLocalExamState());
+    return;
+  }
+
+  disarmExamProtection();
+  stopSnapshotTimer();
+  await stopScreenMonitor(true);
+  await stopVideoMonitor(true);
+  await stopMicrophoneMonitor(true);
+  stopCameraMonitor();
+
+  $("examCard").classList.add("hidden");
+  $("resultCard").classList.remove("hidden");
+
+  const d = res.data || {};
+  const summaryHtml = d.showScoreSummary ? `
+    <div style="display:flex;gap:14px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap">
+      <div>
+        <strong>${esc(d.brandName || "Genz EduTech Innovations")}</strong><br>
+        <strong>Full Name:</strong> ${esc(d.fullName || "")}<br>
+        <strong>Reg ID:</strong> ${esc(d.regId || "")}<br>
+        <strong>Score:</strong> ${esc(d.score || 0)} / ${esc(d.total || 0)}<br>
+        <strong>Percentage:</strong> ${esc(d.percentage || 0)}%<br>
+        <strong>Status:</strong> ${esc(d.passStatus || "")}
+      </div>
+      <div style="display:flex;gap:10px;align-items:flex-start">
+        ${d.brandLogoUrl ? `<img src="${esc(d.brandLogoUrl)}" alt="Logo" style="width:60px;height:60px;object-fit:cover;border-radius:12px;border:1px solid #dbe4f3">` : ""}
+        ${d.passportUrl ? `<img src="${esc(d.passportUrl)}" alt="Passport" style="width:70px;height:82px;object-fit:cover;border-radius:12px;border:1px solid #dbe4f3">` : ""}
+      </div>
+    </div>
+  ` : `<strong>Submission Status:</strong> Submitted successfully.`;
+  const reviewHtml = d.allowReview ? `
+    <div style="margin-top:12px"><strong>Passed Question Nos:</strong> ${esc(d.passedNos || "None")}<br>
+    <strong>Failed Question Nos:</strong> ${esc(d.failedNos || "None")}</div>
+  ` : ``;
+  const messageHtml = d.statusMessage ? `<div style="margin-top:12px;padding:12px;border:1px solid #bfdbfe;background:#eff6ff;border-radius:12px"><strong>Message:</strong> ${esc(d.statusMessage)}</div>` : ``;
+  const signatureHtml = d.signatureUrl ? `<div style="margin-top:16px;text-align:right"><img src="${esc(d.signatureUrl)}" alt="Signature" style="max-height:58px;max-width:200px;object-fit:contain"><div style="font-size:12px;color:#64748b">Authorized Signature</div></div>` : ``;
+  $("resultBox").innerHTML = summaryHtml + reviewHtml + messageHtml + signatureHtml;
+
+  pendingUnlockData = null;
+  clearStudentState();
+}
+
+async function logoutCurrent(){
+  await apiRequest("logout", { token:getToken() }, "POST");
+  stopTimers();
+  disarmExamProtection();
+  stopSnapshotTimer();
+  await stopScreenMonitor(true);
+  await stopVideoMonitor(true);
+  await stopMicrophoneMonitor(true);
+  stopCameraMonitor();
+  clearAuth();
+  clearStudentState();
+  location.reload();
+}
+
+window.addEventListener("beforeunload", function(){
+  saveStudentState(snapshotLocalExamState());
+  autosaveProgress();
+});
+
+$("signupBtn").addEventListener("click", signupStudent);
+$("loginBtn").addEventListener("click", loginStudent);
+$("forgotBtn").addEventListener("click", forgotStudentPassword);
+$("changePasswordBtn").addEventListener("click", changeOwnStudentPassword);
+$("logoutBtn").addEventListener("click", logoutCurrent);
+$("verifyBtn").addEventListener("click", verifyCandidate);
+$("unlockBtn").addEventListener("click", unlockExam);
+$("submitBtn").addEventListener("click", submitExam);
+$("cancelStartBtn").addEventListener("click", function(){
+  hideWarningOverlay();
+  pendingUnlockData = null;
+});
+$("continueStartBtn").addEventListener("click", proceedStartExam);
+
+(async function init(){
+  loadSiteFavicon();
+  if (await validatePortal("student")){
+    await showPortal();
+    populateFromSavedState();
+    await tryAutoResumeFromSavedState();
+  }
+})();
+</script>
+</body>
+</html>

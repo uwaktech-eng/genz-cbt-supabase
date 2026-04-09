@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Genz CBT Pro</title>
+  <link id="siteFavicon" rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%23081224%22/%3E%3Ctext x=%2250%25%22 y=%2254%25%22 font-size=%2232%22 text-anchor=%22middle%22 fill=%22%23facc15%22 font-family=%22Arial%22 dy=%22.1em%22%3EG%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="site-common.css">
+</head>
+<body>
+  <div class="site-shell">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <a class="brand" href="index.html"><span id="brandMark" class="mark">G</span><span id="brandName">Genz CBT Pro</span></a>
+        <nav class="nav">
+          <a href="#about">About</a>
+          <a href="#institutions">Institutions</a>
+          <a href="#testimonials">Testimonials</a>
+          <a href="#tutorials">Tutorials</a>
+          <a href="student.html">Student</a>
+          <a href="admin.html">Admin</a>
+          <a href="result_checker.html">Result Checker</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <section class="hero">
+        <div>
+          <div class="badge" id="heroBadge">Trusted digital assessment experience</div>
+          <h1 id="heroTitle">Genz CBT Pro</h1>
+          <p id="heroSubtitle">A modern CBT and result platform for schools, tutorial centres, and institutions.</p>
+          <div class="cta-row">
+            <a class="btn primary" href="student.html">Open Student Portal</a>
+            <a class="btn secondary" href="admin.html">Open Admin Portal</a>
+            <a class="btn secondary" href="result_checker.html">Check Results</a>
+          </div>
+          <div class="stats">
+            <div class="stat"><strong>CBT</strong><span class="muted">Secure exam delivery with modern controls</span></div>
+            <div class="stat"><strong>Results</strong><span class="muted">Professional result slips and report cards</span></div>
+            <div class="stat"><strong>Drive Ready</strong><span class="muted">Uploads, snapshots, and evidence backed up</span></div>
+          </div>
+        </div>
+        <div class="hero-card">
+          <div class="kicker">Why schools choose it</div>
+          <div class="list-stack" style="margin-top:14px">
+            <div class="card"><h3>Smart exam operations</h3><p>Create exams, manage candidates, and publish results with less manual stress.</p></div>
+            <div class="card"><h3>Professional branding</h3><p>Use your logo, signatures, passports, and result layouts to present a premium school image.</p></div>
+            <div class="card"><h3>Flexible learning support</h3><p>Share tutorials, policies, help content, and school showcases directly on your public site.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="about">
+        <div class="section-head"><div><h2 id="aboutTitle">About Genz CBT Pro</h2><p id="aboutText">Loading public site content...</p></div></div>
+        <div class="page-panel profile">
+          <div class="profile-photo" id="ceoPhotoWrap"><img id="ceoPhoto" alt="CEO" style="display:none"></div>
+          <div>
+            <div class="kicker">Leadership spotlight</div>
+            <h2 id="ceoName">CEO, Genz EduTech Innovations</h2>
+            <div class="muted" id="ceoTitle">Founder & Chief Executive Officer</div>
+            <p class="longtext" id="ceoBio">Add the CEO biography from the admin portal settings.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="contributors">
+        <div class="section-head"><div><h2>Contributors</h2><p>Meet the team and strategic contributors behind the platform.</p></div></div>
+        <div class="grid cols-3" id="contributorsGrid"></div>
+      </section>
+
+      <section class="section" id="institutions">
+        <div class="section-head"><div><h2>Schools & Institutions Using Genz CBT Pro</h2><p>Showcase the institutions using your CBT and result ecosystem.</p></div></div>
+        <div class="logo-grid" id="institutionsGrid"></div>
+      </section>
+
+      <section class="section" id="testimonials">
+        <div class="section-head"><div><h2>Testimonials</h2><p>Feature happy schools, students, parents, and institutional partners with both pictures and videos.</p></div></div>
+        <div class="grid cols-3" id="testimonialsGrid"></div>
+      </section>
+
+      <section class="section" id="tutorials">
+        <div class="section-head"><div><h2>Tutorial Videos & Playlists</h2><p>Link your YouTube channel walkthroughs and playlists so visitors can learn how to use the platform quickly.</p></div></div>
+        <div class="grid cols-3" id="tutorialsGrid"></div>
+      </section>
+    </main>
+
+    <footer class="wrap footer"><div id="siteFooter"></div></footer>
+  </div>
+
+  <script src="site-common.js"></script>
+  <script>
+    function renderCards(list, rootId, kind){
+      const root = document.getElementById(rootId);
+      if(!root) return;
+      const safe = safeList(list, []);
+      if(!safe.length){
+        root.innerHTML = `<div class="card"><h3>No ${kind} added yet</h3><p>Add ${kind} from the admin portal settings to display them here.</p></div>`;
+        return;
+      }
+      root.innerHTML = safe.map(item => {
+        const media = cardMedia(item, kind);
+        const extra = item.videoUrl ? `<a class="embed-link" href="${escHtml(item.videoUrl)}" target="_blank" rel="noopener">Open video ↗</a>` : '';
+        return `<article class="card">${media}<h3>${escHtml(item.name || item.title || kind)}</h3><div class="muted" style="margin-bottom:8px">${escHtml(item.role || item.location || '')}</div><p>${escHtml(item.bio || item.quote || item.description || '')}</p>${extra}</article>`;
+      }).join('');
+    }
+
+    function renderInstitutions(list){
+      const root = document.getElementById('institutionsGrid');
+      const safe = safeList(list, []);
+      if(!safe.length){ root.innerHTML = '<div class="logo-card">Add institutions and logos from the admin portal settings.</div>'; return; }
+      root.innerHTML = safe.map(item => `<div class="logo-card">${item.logoUrl ? `<img src="${escHtml(item.logoUrl)}" alt="${escHtml(item.name||'Institution')}">` : '<div class="media-thumb" style="height:72px;display:grid;place-items:center;margin-bottom:12px">Logo</div>'}<strong>${escHtml(item.name || 'Institution')}</strong><div class="muted" style="margin-top:6px">${escHtml(item.location || '')}</div></div>`).join('');
+    }
+
+    (async function(){
+      const data = await getPublicSiteContent();
+      setSiteFavicon(data.siteFaviconUrl || data.resultBrandLogoUrl);
+      renderBrand(document.getElementById('brandMark'), data);
+      document.getElementById('brandName').textContent = data.resultBrandName || 'Genz CBT Pro';
+      document.getElementById('heroBadge').textContent = data.siteHeroBadge || 'Trusted digital assessment experience';
+      document.getElementById('heroTitle').textContent = data.siteHeroTitle || 'Genz CBT Pro';
+      document.getElementById('heroSubtitle').textContent = data.siteHeroSubtitle || 'A modern CBT and result platform for schools, tutorial centres, and institutions.';
+      document.getElementById('aboutTitle').textContent = data.siteAboutTitle || 'About Genz CBT Pro';
+      document.getElementById('aboutText').innerHTML = nl2br(data.siteAboutText || 'Genz CBT Pro helps schools run secure exams, manage results, and present professional report slips online.');
+      document.getElementById('ceoName').textContent = data.ceoName || 'CEO, Genz EduTech Innovations';
+      document.getElementById('ceoTitle').textContent = data.ceoTitle || 'Founder & Chief Executive Officer';
+      document.getElementById('ceoBio').innerHTML = nl2br(data.ceoBio || 'Add the CEO biography from the admin portal settings.');
+      if(data.ceoImageUrl){ const img=document.getElementById('ceoPhoto'); img.src=data.ceoImageUrl; img.style.display='block'; }
+      renderCards(data.contributors, 'contributorsGrid', 'contributors');
+      renderInstitutions(data.institutions);
+      renderCards(data.testimonials, 'testimonialsGrid', 'testimonials');
+      renderCards(data.tutorialVideos, 'tutorialsGrid', 'tutorial videos');
+      renderFooter(data);
+    })();
+  </script>
+</body>
+</html>
